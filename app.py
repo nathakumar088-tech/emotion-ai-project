@@ -231,10 +231,15 @@ Otherwise answer the user's intended question directly.
 
     except Exception as e:
 
-        print("CHATBOT ERROR:")
-        print(str(e))
+    print("CHATBOT ERROR:")
+    print(str(e))
 
-        return "Sorry, I couldn't process your message right now."
+    error_text = str(e).lower()
+
+    if "429" in error_text or "quota" in error_text or "too_many_requests" in error_text:
+        return "AI service quota is temporarily exceeded. Please try again later."
+
+    return "Sorry, I couldn't process your message right now."
 
 
 # =========================================================
