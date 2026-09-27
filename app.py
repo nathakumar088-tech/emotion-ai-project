@@ -114,6 +114,10 @@ def analysis():
 # AI CHATBOT
 # =========================================================
 
+# =========================================================
+# AI CHATBOT + GOOGLE SEARCH
+# =========================================================
+
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
 
@@ -123,20 +127,22 @@ def chatbot():
         return "Please enter a message."
 
     if gemini_client is None:
-        return "AI chatbot is not configured yet. Please try again later."
+        return "AI chatbot is not configured yet."
 
     system_instruction = """
 You are EmotionAI, a helpful and friendly AI assistant.
 
-Your goals:
-1. Answer the user's questions clearly and accurately.
-2. Explain difficult topics in simple language when appropriate.
-3. If the user talks about emotions or personal difficulties,
-   respond with empathy, encouragement and practical, safe support.
-4. Never pretend that an emotion prediction is a medical diagnosis.
-5. If you are uncertain about a fact, say so instead of inventing information.
-6. Do not claim to be a human.
-7. Be respectful and non-judgmental.
+Answer questions clearly and accurately.
+
+If the user discusses emotions or personal difficulties,
+respond with empathy, encouragement and safe practical support.
+
+For current, recent, changing, or factual information,
+use Google Search when useful.
+
+Do not invent facts or sources.
+Do not claim to be human.
+Do not treat emotion prediction as a medical diagnosis.
 """
 
     prompt = f"""
@@ -145,17 +151,20 @@ Your goals:
 User message:
 {message}
 
-Give a helpful answer to the user.
+Give the user a helpful answer.
 """
 
     try:
 
-        response = gemini_client.models.generate_content(
+        interaction = gemini_client.interactions.create(
             model="gemini-3.8-flash",
-            contents=prompt
+            input=prompt,
+            tools=[
+                {"type": "google_search"}
+            ]
         )
 
-        answer = response.text
+        answer = interaction.output_text
 
         if not answer:
             return "I couldn't generate a response. Please try again."
