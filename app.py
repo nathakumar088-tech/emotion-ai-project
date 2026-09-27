@@ -110,6 +110,9 @@ def analysis():
 # =========================================================
 # CHATBOT
 # =========================================================
+# =========================================================
+# AI CHATBOT
+# =========================================================
 
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
@@ -119,63 +122,52 @@ def chatbot():
     if not message:
         return "Please enter a message."
 
-    text = message.lower()
+    if gemini_client is None:
+        return "AI chatbot is not configured yet. Please try again later."
 
-    if any(word in text for word in [
-        "happy",
-        "good",
-        "great",
-        "excited"
-    ]):
+    system_instruction = """
+You are EmotionAI, a helpful and friendly AI assistant.
 
-        reply = (
-            "That's nice to hear! 😊 "
-            "What made you feel this way?"
+Your goals:
+1. Answer the user's questions clearly and accurately.
+2. Explain difficult topics in simple language when appropriate.
+3. If the user talks about emotions or personal difficulties,
+   respond with empathy, encouragement and practical, safe support.
+4. Never pretend that an emotion prediction is a medical diagnosis.
+5. If you are uncertain about a fact, say so instead of inventing information.
+6. Do not claim to be a human.
+7. Be respectful and non-judgmental.
+"""
+
+    prompt = f"""
+{system_instruction}
+
+User message:
+{message}
+
+Give a helpful answer to the user.
+"""
+
+    try:
+
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
         )
 
-    elif any(word in text for word in [
-        "sad",
-        "upset",
-        "bad",
-        "lonely"
-    ]):
+        answer = response.text
 
-        reply = (
-            "I'm sorry you're having a difficult moment. "
-            "You can talk about what's bothering you."
-        )
+        if not answer:
+            return "I couldn't generate a response. Please try again."
 
-    elif any(word in text for word in [
-        "angry",
-        "mad",
-        "frustrated"
-    ]):
+        return answer
 
-        reply = (
-            "It sounds like something is frustrating you. "
-            "Taking a short pause and talking about it may help."
-        )
+    except Exception as e:
 
-    elif any(word in text for word in [
-        "hello",
-        "hi",
-        "hey"
-    ]):
+        print("CHATBOT ERROR:")
+        print(str(e))
 
-        reply = (
-            "Hello! 👋 "
-            "I'm your EmotionAI assistant. "
-            "How are you feeling today?"
-        )
-
-    else:
-
-        reply = (
-            "I understand. "
-            "Tell me a little more about how you're feeling."
-        )
-
-    return reply
+        return "Sorry, I couldn't process your message right now."
 
 
 # =========================================================
