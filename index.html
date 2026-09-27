@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Human Emotion Understanding</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(
+                135deg,
+                #0f172a,
+                #1e1b4b
+            );
+            color: white;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #a78bfa;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            color: #a78bfa;
+        }
+
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+            padding: 60px 8%;
+        }
+
+        .hero-text {
+            max-width: 600px;
+        }
+
+        .hero-text h1 {
+            font-size: 50px;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .hero-text h1 span {
+            color: #a78bfa;
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: #7c3aed;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #6d28d9;
+            transform: translateY(-2px);
+        }
+
+        /* =========================
+           EMOTION CARD
+        ========================= */
+
+        .emotion-card {
+            width: 390px;
+            padding: 35px;
+            text-align: center;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.3);
+        }
+
+        .emotion-icon {
+            font-size: 70px;
+            margin-bottom: 15px;
+        }
+
+        .emotion-card h2 {
+            margin-bottom: 10px;
+            color: #c4b5fd;
+        }
+
+        .emotion-card p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* =========================
+           ANALYSIS BUTTONS
+        ========================= */
+
+        .action-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .record-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #ef4444;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .record-btn:hover {
+            background: #dc2626;
+        }
+
+        .record-btn.recording {
+            background: #991b1b;
+            animation: pulse 1s infinite;
+        }
+
+        .upload-label {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            background: #334155;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .upload-label:hover {
+            background: #475569;
+        }
+
+        #audioFile {
+            display: none;
+        }
+
+        #audioPreview {
+            width: 100%;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+        }
+
+        .analyze-btn:hover {
+            background: #6d28d9;
+        }
+
+        #status {
+            margin-top: 15px;
+            color: #c4b5fd;
+            font-size: 14px;
+        }
+
+        /* =========================
+           CHATBOT
+        ========================= */
+
+        .chatbot-section {
+            max-width: 700px;
+            margin: 20px auto 60px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow:
+                0 15px 40px
+                rgba(0, 0, 0, 0.25);
+        }
+
+        .chatbot-section h2 {
+            color: #c4b5fd;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .chatbot-section p {
+            color: #cbd5e1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #chatMessage {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .chat-send-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .chat-send-btn:hover {
+            background: #6d28d9;
+        }
+
+        #chatReply {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 20px;
+        }
+
+        /* =========================
+           ANIMATION
+        ========================= */
+
+        @keyframes pulse {
+
+            0% {
+                box-shadow:
+                    0 0 0 0
+                    rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow:
+                    0 0 0 12px
+                    rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 0 0
+                    rgba(239, 68, 68, 0);
+            }
+
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 40px;
+            }
+
+            .hero-text h1 {
+                font-size: 38px;
+            }
+
+            .emotion-card {
+                width: 100%;
+                max-width: 390px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .chatbot-section {
+                width: 90%;
+                padding: 22px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVBAR
+    ========================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            EmotionAI
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">Home</a>
+
+            <a href="#about">About</a>
+
+            <a href="#features">Features</a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =========================
+         HERO SECTION
+    ========================= -->
+
+    <section class="hero">
+
+
+        <div class="hero-text">
+
+            <h1>
+                Understand Human
+                <span>Emotions</span>
+                Through Speech
+            </h1>
+
+            <p>
+                An AI-powered system that analyzes human speech
+                and identifies the underlying emotional state
+                using speech analysis techniques.
+            </p>
+
+            <a href="/analysis"
+               class="btn">
+
+                Start Emotion Analysis
+
+            </a>
+
+        </div>
+
+
+        <!-- =========================
+             EMOTION CARD
+        ========================= -->
+
+        <div class="emotion-card">
+
+            <div class="emotion-icon">
+                🎙️
+            </div>
+
+            <h2>
+                Speech Emotion AI
+            </h2>
+
+            <p>
+                Record or upload your voice and let our AI
+                analyze the emotional characteristics of your speech.
+            </p>
+
+
+            <div class="action-box">
+
+
+                <!-- RECORD -->
+
+                <button
+                    type="button"
+                    id="recordBtn"
+                    class="record-btn">
+
+                    🎙️ Start Recording
+
+                </button>
+
+
+                <!-- UPLOAD -->
+
+                <label
+                    for="audioFile"
+                    class="upload-label">
+
+                    📁 Upload Audio
+
+                </label>
+
+                <input
+                    type="file"
+                    id="audioFile"
+                    accept="audio/*">
+
+
+                <!-- AUDIO PREVIEW -->
+
+                <audio
+                    id="audioPreview"
+                    controls>
+                </audio>
+
+
+                <!-- ANALYZE -->
+
+                <button
+                    type="button"
+                    id="analyzeBtn"
+                    class="analyze-btn">
+
+                    🤖 Analyze Emotion
+
+                </button>
+
+
+                <div id="status"></div>
+
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =========================
+         EMOTION-AWARE CHATBOT
+    ========================= -->
+
+    <section class="chatbot-section">
+
+        <h2>
+            🤖 EmotionAI Assistant
+        </h2>
+
+        <p>
+            Tell me how you are feeling and I will respond.
+        </p>
+
+
+        <input
+            type="text"
+            id="chatMessage"
+            placeholder="Tell me how you feel...">
+
+
+        <button
+            type="button"
+            class="chat-send-btn"
+            onclick="sendMessage()">
+
+            💬 Send Message
+
+        </button>
+
+
+        <div id="chatReply"></div>
+
+
+    </section>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+
+        /* =========================
+           CHATBOT
+        ========================= */
+
+        async function sendMessage() {
+
+            const message =
+                document
+                .getElementById("chatMessage")
+                .value
+                .trim();
+
+
+            const replyBox =
+                document
+                .getElementById("chatReply");
+
+
+            if (!message) {
+
+                replyBox.innerText =
+                    "Please type something.";
+
+                return;
+
+            }
+
+
+            replyBox.innerText =
+                "🤖 Thinking...";
+
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "message",
+                message
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/chatbot",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                const reply =
+                    await response.text();
+
+
+                replyBox.innerText =
+                    "🤖 " + reply;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                replyBox.innerText =
+                    "❌ Chatbot connection failed.";
+
+            }
+
+        }
+
+
+        /* =========================
+           RECORDING VARIABLES
+        ========================= */
+
+        let mediaRecorder;
+
+        let audioChunks = [];
+
+        let recordedBlob = null;
+
+
+        const recordBtn =
+            document.getElementById(
+                "recordBtn"
+            );
+
+
+        const audioFile =
+            document.getElementById(
+                "audioFile"
+            );
+
+
+        const audioPreview =
+            document.getElementById(
+                "audioPreview"
+            );
+
+
+        const analyzeBtn =
+            document.getElementById(
+                "analyzeBtn"
+            );
+
+
+        const status =
+            document.getElementById(
+                "status"
+            );
+
+
+        /* =========================
+           RECORD VOICE
+        ========================= */
+
+        recordBtn.addEventListener(
+            "click",
+            async function () {
+
+
+                if (
+                    !mediaRecorder ||
+                    mediaRecorder.state === "inactive"
+                ) {
+
+
+                    try {
+
+
+                        const stream =
+                            await navigator
+                            .mediaDevices
+                            .getUserMedia({
+                                audio: true
+                            });
+
+
+                        audioChunks = [];
+
+
+                        mediaRecorder =
+                            new MediaRecorder(
+                                stream
+                            );
+
+
+                        mediaRecorder.ondataavailable =
+                            function (event) {
+
+
+                                if (
+                                    event.data.size > 0
+                                ) {
+
+                                    audioChunks.push(
+                                        event.data
+                                    );
+
+                                }
+
+                            };
+
+
+                        mediaRecorder.onstop =
+                            function () {
+
+
+                                recordedBlob =
+                                    new Blob(
+                                        audioChunks,
+                                        {
+                                            type:
+                                                "audio/webm"
+                                        }
+                                    );
+
+
+                                const audioURL =
+                                    URL.createObjectURL(
+                                        recordedBlob
+                                    );
+
+
+                                audioPreview.src =
+                                    audioURL;
+
+
+                                audioPreview.style.display =
+                                    "block";
+
+
+                                analyzeBtn.style.display =
+                                    "block";
+
+
+                                status.innerText =
+                                    "Recording ready. Click Analyze Emotion.";
+
+
+                            };
+
+
+                        mediaRecorder.start();
+
+
+                        recordBtn.innerText =
+                            "⏹️ Stop Recording";
+
+
+                        recordBtn.classList.add(
+                            "recording"
+                        );
+
+
+                        status.innerText =
+                            "🔴 Recording... Speak now!";
+
+
+                    }
+
+
+                    catch (error) {
+
+
+                        status.innerText =
+                            "❌ Microphone permission denied.";
+
+
+                        console.error(error);
+
+                    }
+
+
+                }
+
+
+                else {
+
+
+                    mediaRecorder.stop();
+
+
+                    mediaRecorder.stream
+                        .getTracks()
+                        .forEach(
+                            track =>
+                                track.stop()
+                        );
+
+
+                    recordBtn.innerText =
+                        "🎙️ Start Recording";
+
+
+                    recordBtn.classList.remove(
+                        "recording"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           AUDIO FILE UPLOAD
+        ========================= */
+
+        audioFile.addEventListener(
+            "change",
+            function () {
+
+
+                const file =
+                    this.files[0];
+
+
+                if (!file) {
+
+                    return;
+
+                }
+
+
+                recordedBlob = null;
+
+
+                audioPreview.src =
+                    URL.createObjectURL(
+                        file
+                    );
+
+
+                audioPreview.style.display =
+                    "block";
+
+
+                analyzeBtn.style.display =
+                    "block";
+
+
+                status.innerText =
+                    "Audio selected: " +
+                    file.name;
+
+            }
+        );
+
+
+        /* =========================
+           ANALYZE AUDIO
+        ========================= */
+
+        analyzeBtn.addEventListener(
+            "click",
+            async function () {
+
+
+                let file;
+
+
+                if (recordedBlob) {
+
+
+                    file =
+                        new File(
+                            [recordedBlob],
+                            "recorded_voice.webm",
+                            {
+                                type:
+                                    "audio/webm"
+                            }
+                        );
+
+                }
+
+
+                else {
+
+
+                    file =
+                        audioFile.files[0];
+
+                }
+
+
+                if (!file) {
+
+
+                    status.innerText =
+                        "❌ Please record or upload audio.";
+
+
+                    return;
+
+                }
+
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "audio",
+                    file
+                );
+
+
+                status.innerText =
+                    "🤖 Analyzing emotion...";
+
+
+                analyzeBtn.disabled =
+                    true;
+
+
+                try {
+
+
+                    const response =
+                        await fetch(
+                            "/upload",
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    const result =
+                        await response.text();
+
+
+                    document.open();
+
+
+                    document.write(
+                        result
+                    );
+
+
+                    document.close();
+
+
+                }
+
+
+                catch (error) {
+
+
+                    console.error(error);
+
+
+                    status.innerText =
+                        "❌ Analysis failed.";
+
+
+                    analyzeBtn.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+
+    </script>
+
+
+</body>
+
+</html>

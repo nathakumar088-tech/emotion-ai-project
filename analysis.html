@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Emotion Analysis - EmotionAI</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(
+                135deg,
+                #0f172a,
+                #1e1b4b
+            );
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #a78bfa;
+        }
+
+        .home {
+            color: white;
+            text-decoration: none;
+        }
+
+        .home:hover {
+            color: #a78bfa;
+        }
+
+        .container {
+            min-height: 85vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .analysis-box {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #8b5cf6;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            background: rgba(124, 58, 237, 0.08);
+        }
+
+        .mic {
+            font-size: 65px;
+            margin-bottom: 15px;
+        }
+
+        .upload-area h2 {
+            color: #c4b5fd;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .record-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: #dc2626;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .record-btn:hover {
+            background: #b91c1c;
+        }
+
+        .record-btn.stop {
+            background: #475569;
+        }
+
+        .record-btn.stop:hover {
+            background: #334155;
+        }
+
+        .status {
+            min-height: 25px;
+            margin: 12px 0;
+            color: #c4b5fd;
+            font-size: 14px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 10px 0 20px 0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .choose-btn {
+            display: inline-block;
+            padding: 13px 25px;
+            background: #7c3aed;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .choose-btn:hover {
+            background: #6d28d9;
+        }
+
+        #file-name {
+            margin-top: 15px;
+            color: #c4b5fd;
+            min-height: 20px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: #7c3aed;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .analyze-btn:hover {
+            background: #6d28d9;
+        }
+
+        .analyze-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 0;
+            color: #64748b;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .info {
+            margin-top: 25px;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+
+            .analysis-box {
+                padding: 25px 18px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .mic {
+                font-size: 55px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <nav class="navbar">
+
+        <div class="logo">
+            EmotionAI
+        </div>
+
+        <a href="/" class="home">
+            ← Home
+        </a>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="analysis-box">
+
+            <h1>🎙️ Emotion Analysis</h1>
+
+            <p class="subtitle">
+                Record your voice or upload an audio file.
+                Our AI will analyze the emotions in your speech.
+            </p>
+
+
+            <!-- ========================= -->
+            <!-- MICROPHONE RECORDING -->
+            <!-- ========================= -->
+
+            <div class="upload-area">
+
+                <div class="mic">
+                    🎤
+                </div>
+
+                <h2>
+                    Record Your Voice
+                </h2>
+
+                <p>
+                    Click the button and speak for a few seconds.
+                </p>
+
+
+                <button
+                    type="button"
+                    id="recordBtn"
+                    class="record-btn">
+
+                    🎙️ Start Recording
+
+                </button>
+
+
+                <div
+                    id="status"
+                    class="status">
+
+                </div>
+
+
+                <audio
+                    id="audioPreview"
+                    controls
+                    style="display:none;">
+
+                </audio>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- UPLOAD AUDIO -->
+            <!-- ========================= -->
+
+            <div class="divider">
+                OR
+            </div>
+
+
+            <form
+                id="uploadForm"
+                action="/upload"
+                method="POST"
+                enctype="multipart/form-data">
+
+
+                <div class="upload-area">
+
+                    <div class="mic">
+                        📁
+                    </div>
+
+                    <h2>
+                        Upload Audio
+                    </h2>
+
+                    <p>
+                        Supported formats: WAV, MP3, OGG, WebM
+                    </p>
+
+
+                    <label
+                        for="audio"
+                        class="choose-btn">
+
+                        📁 Choose Audio
+
+                    </label>
+
+
+                    <input
+                        type="file"
+                        id="audio"
+                        name="audio"
+                        accept="audio/*"
+                    >
+
+
+                    <div id="file-name">
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="analyze-btn"
+                    id="analyzeBtn"
+                    disabled>
+
+                    🔍 Analyze Emotion
+
+                </button>
+
+
+            </form>
+
+
+            <div class="info">
+
+                🔒 Your audio is processed by the
+                AI emotion model for analysis.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const recordBtn =
+            document.getElementById("recordBtn");
+
+        const audioPreview =
+            document.getElementById("audioPreview");
+
+        const statusText =
+            document.getElementById("status");
+
+        const audioInput =
+            document.getElementById("audio");
+
+        const fileName =
+            document.getElementById("file-name");
+
+        const analyzeBtn =
+            document.getElementById("analyzeBtn");
+
+        const uploadForm =
+            document.getElementById("uploadForm");
+
+
+        let mediaRecorder = null;
+
+        let audioChunks = [];
+
+        let recordedBlob = null;
+
+
+        // ==========================================
+        // START / STOP RECORDING
+        // ==========================================
+
+        recordBtn.addEventListener(
+            "click",
+            async function() {
+
+                // START RECORDING
+                if (!mediaRecorder ||
+                    mediaRecorder.state === "inactive") {
+
+                    try {
+
+                        const stream =
+                            await navigator.mediaDevices.getUserMedia({
+                                audio: true
+                            });
+
+
+                        audioChunks = [];
+
+
+                        let options = {};
+
+
+                        // Prefer WebM/Opus
+                        if (
+                            MediaRecorder.isTypeSupported(
+                                "audio/webm;codecs=opus"
+                            )
+                        ) {
+
+                            options.mimeType =
+                                "audio/webm;codecs=opus";
+
+                        }
+
+
+                        mediaRecorder =
+                            new MediaRecorder(
+                                stream,
+                                options
+                            );
+
+
+                        mediaRecorder.ondataavailable =
+                            function(event) {
+
+                                if (event.data.size > 0) {
+
+                                    audioChunks.push(
+                                        event.data
+                                    );
+
+                                }
+
+                            };
+
+
+                        mediaRecorder.onstop =
+                            function() {
+
+                                recordedBlob =
+                                    new Blob(
+                                        audioChunks,
+                                        {
+                                            type:
+                                                mediaRecorder.mimeType ||
+                                                "audio/webm"
+                                        }
+                                    );
+
+
+                                const audioURL =
+                                    URL.createObjectURL(
+                                        recordedBlob
+                                    );
+
+
+                                audioPreview.src =
+                                    audioURL;
+
+                                audioPreview.style.display =
+                                    "block";
+
+
+                                analyzeBtn.disabled =
+                                    false;
+
+
+                                statusText.textContent =
+                                    "✅ Recording ready. Click Analyze Emotion.";
+
+
+                                // Stop microphone
+                                stream
+                                    .getTracks()
+                                    .forEach(
+                                        track =>
+                                            track.stop()
+                                    );
+
+                            };
+
+
+                        mediaRecorder.start();
+
+
+                        recordBtn.textContent =
+                            "⏹️ Stop Recording";
+
+
+                        recordBtn.classList.add(
+                            "stop"
+                        );
+
+
+                        statusText.textContent =
+                            "🔴 Recording... Speak now.";
+
+
+                        analyzeBtn.disabled =
+                            true;
+
+
+                    }
+
+                    catch (error) {
+
+                        console.error(error);
+
+
+                        statusText.textContent =
+                            "❌ Microphone permission denied or unavailable.";
+
+                    }
+
+                }
+
+                // STOP RECORDING
+                else {
+
+                    mediaRecorder.stop();
+
+
+                    recordBtn.textContent =
+                        "🎙️ Start Recording";
+
+
+                    recordBtn.classList.remove(
+                        "stop"
+                    );
+
+                }
+
+            }
+        );
+
+
+        // ==========================================
+        // FILE SELECTION
+        // ==========================================
+
+        audioInput.addEventListener(
+            "change",
+            function() {
+
+                if (this.files.length > 0) {
+
+                    fileName.textContent =
+                        "Selected: " +
+                        this.files[0].name;
+
+
+                    recordedBlob = null;
+
+
+                    audioPreview.style.display =
+                        "none";
+
+
+                    analyzeBtn.disabled =
+                        false;
+
+
+                    statusText.textContent =
+                        "Audio file selected.";
+
+                }
+
+            }
+        );
+
+
+        // ==========================================
+        // ANALYZE
+        // ==========================================
+
+        uploadForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                analyzeBtn.disabled =
+                    true;
+
+
+                analyzeBtn.textContent =
+                    "⏳ Analyzing...";
+
+
+                statusText.textContent =
+                    "🤖 AI is analyzing your voice...";
+
+
+                const formData =
+                    new FormData();
+
+
+                // If recorded audio exists
+                if (recordedBlob) {
+
+                    formData.append(
+                        "audio",
+                        recordedBlob,
+                        "recorded_voice.webm"
+                    );
+
+                }
+
+                // Otherwise uploaded file
+                else if (audioInput.files.length > 0) {
+
+                    formData.append(
+                        "audio",
+                        audioInput.files[0]
+                    );
+
+                }
+
+                else {
+
+                    statusText.textContent =
+                        "❌ Please record or select an audio file.";
+
+                    analyzeBtn.disabled =
+                        false;
+
+                    analyzeBtn.textContent =
+                        "🔍 Analyze Emotion";
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/upload",
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    const result =
+                        await response.text();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server error: " +
+                            response.status
+                        );
+
+                    }
+
+
+                    // Show Flask result page
+                    document.open();
+
+                    document.write(result);
+
+                    document.close();
+
+                }
+
+                catch (error) {
+
+                    console.error(error);
+
+
+                    statusText.textContent =
+                        "❌ Error: " +
+                        error.message;
+
+
+                    analyzeBtn.disabled =
+                        false;
+
+
+                    analyzeBtn.textContent =
+                        "🔍 Analyze Emotion";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

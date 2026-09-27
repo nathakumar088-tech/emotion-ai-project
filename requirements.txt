@@ -1,0 +1,7 @@
+Flask==3.1.3
+gunicorn==26.2.0
+onnxruntime
+numpy
+librosa
+soundfile
+huggingface_hub
