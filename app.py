@@ -118,6 +118,10 @@ def analysis():
 # AI CHATBOT + GOOGLE SEARCH
 # =========================================================
 
+# =========================================================
+# FAST AI CHATBOT
+# =========================================================
+
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
 
@@ -130,19 +134,23 @@ def chatbot():
         return "AI chatbot is not configured yet."
 
     system_instruction = """
-You are EmotionAI, a helpful and friendly AI assistant.
+You are EmotionAI, a fast, friendly and helpful AI assistant.
 
-Answer questions clearly and accurately.
-
-If the user discusses emotions or personal difficulties,
-respond with empathy, encouragement and safe practical support.
-
-For current, recent, changing, or factual information,
-use Google Search when useful.
-
-Do not invent facts or sources.
-Do not claim to be human.
-Do not treat emotion prediction as a medical diagnosis.
+IMPORTANT:
+- Understand spelling mistakes, typing mistakes, abbreviations,
+  informal English, and Tanglish.
+- Infer what the user intended to ask.
+- Do not criticize spelling mistakes.
+- Answer the intended question directly.
+- Keep normal answers concise and fast.
+- Be accurate and never invent facts.
+- For current, recent, latest, today's, live, or changing information,
+  use Google Search.
+- For normal/general questions, answer directly without web search.
+- If the user talks about emotions or personal difficulties,
+  respond with empathy and safe, supportive guidance.
+- Never claim to be human.
+- Emotion prediction is not a medical diagnosis.
 """
 
     prompt = f"""
@@ -151,18 +159,47 @@ Do not treat emotion prediction as a medical diagnosis.
 User message:
 {message}
 
-Give the user a helpful answer.
+Answer the user's intended question clearly.
 """
 
     try:
 
-        interaction = gemini_client.interactions.create(
-            model="gemini-3.8-flash",
-            input=prompt,
-            tools=[
-                {"type": "google_search"}
-            ]
+        # Current/latest questions → Google Search
+        search_words = [
+            "latest",
+            "today",
+            "current",
+            "now",
+            "recent",
+            "news",
+            "weather",
+            "live",
+            "price",
+            "score",
+            "2026"
+        ]
+
+        use_search = any(
+            word in message.lower()
+            for word in search_words
         )
+
+        if use_search:
+
+            interaction = gemini_client.interactions.create(
+                model="gemini-3.8-flash",
+                input=prompt,
+                tools=[
+                    {"type": "google_search"}
+                ]
+            )
+
+        else:
+
+            interaction = gemini_client.interactions.create(
+                model="gemini-3.8-flash",
+                input=prompt
+            )
 
         answer = interaction.output_text
 
