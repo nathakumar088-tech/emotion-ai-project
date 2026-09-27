@@ -227,52 +227,95 @@ def convert_to_wav(input_path):
 # AUDIO PREPROCESSING
 # ==============================
 
-def prepare_audio(file_path):
+def predict_emotion(file_path):
 
-    print("Loading WAV audio...")
+    session = get_emotion_session()
 
-    audio, sample_rate = librosa.load(
-        file_path,
-        sr=16000,
-        mono=True
-    )
+    audio = prepare_audio(file_path)
 
-    audio = audio.astype(np.float32)
+    input_info = session.get_inputs()[0]
+    input_name = input_info.name
 
-    # Remove leading/trailing silence
-    audio, _ = librosa.effects.trim(
+    print("ONNX input name:", input_name)
+    print("ONNX input shape:", input_info.shape)
+    print("ONNX input type:", input_info.type)
+
+    # Wav2Vec2 expects [batch, audio_samples]
+    input_data = np.expand_dims(
         audio,
-        top_db=30
+        axis=0
+    ).astype(np.float32)
+
+    print("Input data shape:", input_data.shape)
+
+    outputs = session.run(
+        None,
+        {
+            input_name: input_data
+        }
     )
 
-    # Maximum 10 seconds
-    max_samples = 16000 * 10
+    print("ONNX prediction completed.")
+    print("Number of outputs:", len(outputs))
 
-    if len(audio) > max_samples:
-        audio = audio[:max_samples]
+    logits = np.asarray(outputs[0])
+    logits = np.squeeze(logits)
 
-    if len(audio) == 0:
-        raise ValueError(
-            "Audio file contains no usable speech."
+    print("Raw model output:", logits)
+
+    if logits.size != 8:
+        raise RuntimeError(
+            f"Unexpected model output size: {logits.size}. "
+            f"Expected 8 emotion scores."
         )
 
-    # Wav2Vec2 feature extraction uses input normalization.
-    mean = np.mean(audio)
-    std = np.std(audio)
+    logits = logits.astype(np.float64)
 
-    if std > 1e-7:
-        audio = (audio - mean) / std
+    # Stable softmax
+    logits = logits - np.max(logits)
 
-    audio = audio.astype(np.float32)
+    exp_values = np.exp(logits)
 
-    print("Audio prepared successfully!")
-    print("Sample rate:", sample_rate)
-    print("Audio samples:", len(audio))
-    print("Audio mean:", float(np.mean(audio)))
-    print("Audio std:", float(np.std(audio)))
+    probabilities = exp_values / np.sum(exp_values)
 
-    return audio
+    # Official model label order
+    labels = [
+        "ANG",
+        "CAL",
+        "DIS",
+        "FEA",
+        "HAP",
+        "NEU",
+        "SAD",
+        "SUR"
+    ]
 
+    results = []
+
+    for label, probability in zip(
+        labels,
+        probabilities
+    ):
+        results.append({
+            "label": label,
+            "score": float(probability)
+        })
+
+    results.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    print("Emotion results:")
+
+    for result in results:
+        print(
+            result["label"],
+            round(result["score"] * 100, 2),
+            "%"
+        )
+
+    return results
 
 # ==============================
 # AI PREDICTION
