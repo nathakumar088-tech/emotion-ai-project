@@ -235,8 +235,6 @@ Otherwise answer the user's intended question directly.
         print(str(e))
 
         return "Sorry, I couldn't process your message right now."
-```
-
 
 
 # =========================================================
