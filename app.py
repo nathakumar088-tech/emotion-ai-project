@@ -8,6 +8,16 @@ from huggingface_hub import hf_hub_download
 from google import genai
 
 app = Flask(__name__)
+# =========================================================
+# GEMINI AI CHATBOT
+# =========================================================
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+gemini_client = None
+
+if GEMINI_API_KEY:
+    gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 # =========================================================
 # UPLOAD FOLDER
