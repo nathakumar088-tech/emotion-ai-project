@@ -865,27 +865,3 @@ if __name__ == "__main__":
             )
         )
     )
-```
-
-### Ippo enna pannanum
-
-**1.** GitHub → `app.py` → Edit
-**2.** `Ctrl + A` → மேலே கொடுத்த **full code மட்டும்** paste பண்ணு.
-**3.** `Commit changes` பண்ணு.
-**4.** Render automatic deploy ஆகட்டும்.
-**5.** `Live` ஆனதும் phone-la test பண்ணு.
-
-இந்த version-ல்:
-
-* duplicate `predict_emotion()` ❌ removed
-* indentation error ❌ removed
-* missing `prepare_audio()` ✅ added
-* 16 kHz mono ✅
-* model-required waveform normalization ✅
-* correct 8-label mapping ✅
-* stable softmax ✅
-* input shape/type/min/max logs ✅
-
-Official model configuration confirms the exact 8-label mapping and the processor configuration specifies 16 kHz with normalization.
-
-**But one honest point:** இந்த code model-ஐ “correct-aa” force செய்யாது. Model training itself has limitations, so a real happy voice can still occasionally be predicted as Sad. இந்த change-ன் goal **wrong code/preprocessing காரணமான error-ஐ remove பண்ணுவது**, not fake the result.
