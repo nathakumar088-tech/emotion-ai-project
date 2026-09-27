@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,session
 import os
 import subprocess
 import numpy as np
@@ -8,6 +8,7 @@ from huggingface_hub import hf_hub_download
 from google import genai
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "emotion-ai-secret-key")
 # =========================================================
 # GEMINI AI CHATBOT
 # =========================================================
@@ -184,24 +185,46 @@ Answer the user's intended question clearly.
             for word in search_words
         )
 
-        if use_search:
+     if use_search:
 
-            interaction = gemini_client.interactions.create(
-                model="gemini-3.8-flash",
-                input=prompt,
-                tools=[
-                    {"type": "google_search"}
-                ]
-            )
+    previous_id = session.get("previous_interaction_id")
 
-        else:
+    interaction_args = {
+        "model": "gemini-3.8-flash",
+        "input": prompt,
+        "tools": [
+            {"type": "google_search"}
+        ]
+    }
 
-            interaction = gemini_client.interactions.create(
-                model="gemini-3.8-flash",
-                input=prompt
-            )
+    if previous_id:
+        interaction_args["previous_interaction_id"] = previous_id
 
-        answer = interaction.output_text
+    interaction = gemini_client.interactions.create(**interaction_args)
+
+else:
+
+    previous_id = session.get("previous_interaction_id")
+
+    interaction_args = {
+        "model": "gemini-3.8-flash",
+        "input": prompt
+    }
+
+    if previous_id:
+        interaction_args["previous_interaction_id"] = previous_id
+
+    interaction = gemini_client.interactions.create(**interaction_args)
+
+
+session["previous_interaction_id"] = interaction.id
+
+answer = interaction.output_text
+
+if not answer:
+    return "I couldn't generate a response. Please try again."
+
+return answer
 
         if not answer:
             return "I couldn't generate a response. Please try again."
