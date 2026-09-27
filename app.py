@@ -123,6 +123,11 @@ def analysis():
 # FAST AI CHATBOT
 # =========================================================
 
+```python
+# =========================================================
+# FAST AI CHATBOT + GOOGLE SEARCH
+# =========================================================
+
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
 
@@ -141,15 +146,19 @@ IMPORTANT:
 - Understand spelling mistakes, typing mistakes, abbreviations,
   informal English, and Tanglish.
 - Infer what the user intended to ask.
-- Do not criticize spelling mistakes.
+- Never criticize spelling mistakes.
 - Answer the intended question directly.
 - Keep normal answers concise and fast.
-- Be accurate and never invent facts.
-- For current, recent, latest, today's, live, or changing information,
-  use Google Search.
+- For current, recent, latest, today's, live, changing,
+  news, weather, scores, prices, or events, USE GOOGLE SEARCH.
+- When Google Search is enabled for a request, actually use the
+  search results to answer the user.
+- Do not answer a current-information question from old knowledge.
+- If the user asks for today's/latest news, search the web first
+  and summarize the relevant current results.
 - For normal/general questions, answer directly without web search.
 - If the user talks about emotions or personal difficulties,
-  respond with empathy and safe, supportive guidance.
+  respond with empathy and safe supportive guidance.
 - Never claim to be human.
 - Emotion prediction is not a medical diagnosis.
 """
@@ -160,12 +169,16 @@ IMPORTANT:
 User message:
 {message}
 
-Answer the user's intended question clearly.
+If this is a current/latest/today/news/live question, use Google Search
+and give the user a concise answer based on the current search results.
+
+Otherwise answer the user's intended question directly.
 """
 
     try:
 
-        # Current/latest questions → Google Search
+        message_lower = message.lower()
+
         search_words = [
             "latest",
             "today",
@@ -177,44 +190,36 @@ Answer the user's intended question clearly.
             "live",
             "price",
             "score",
+            "scores",
+            "event",
             "2026"
         ]
 
         use_search = any(
-            word in message.lower()
+            word in message_lower
             for word in search_words
         )
 
+        previous_id = session.get("previous_interaction_id")
+
+        interaction_args = {
+            "model": "gemini-3.8-flash",
+            "input": prompt
+        }
+
+        # Current/latest information → Google Search
         if use_search:
+            interaction_args["tools"] = [
+                {"type": "google_search"}
+            ]
 
-            previous_id = session.get("previous_interaction_id")
+        # Continue previous conversation
+        if previous_id:
+            interaction_args["previous_interaction_id"] = previous_id
 
-            interaction_args = {
-                "model": "gemini-3.8-flash",
-                "input": prompt,
-                "tools": [
-                    {"type": "google_search"}
-                ]
-            }
-
-            if previous_id:
-                interaction_args["previous_interaction_id"] = previous_id
-
-            interaction = gemini_client.interactions.create(**interaction_args)
-
-        else:
-
-            previous_id = session.get("previous_interaction_id")
-
-            interaction_args = {
-                "model": "gemini-3.8-flash",
-                "input": prompt
-            }
-
-            if previous_id:
-                interaction_args["previous_interaction_id"] = previous_id
-
-            interaction = gemini_client.interactions.create(**interaction_args)
+        interaction = gemini_client.interactions.create(
+            **interaction_args
+        )
 
         session["previous_interaction_id"] = interaction.id
 
@@ -231,6 +236,8 @@ Answer the user's intended question clearly.
         print(str(e))
 
         return "Sorry, I couldn't process your message right now."
+```
+
 
 
 # =========================================================
