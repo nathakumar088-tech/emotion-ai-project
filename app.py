@@ -139,27 +139,26 @@ def chatbot():
         return "AI chatbot is not configured yet."
 
     system_instruction = """
-You are EmotionAI, a fast, friendly and helpful AI assistant.
+You are EmotionAI, a fast and friendly AI assistant.
 
-IMPORTANT:
-- Understand spelling mistakes, typing mistakes, abbreviations,
-  informal English, and Tanglish.
-- Infer what the user intended to ask.
-- Never criticize spelling mistakes.
-- Answer the intended question directly.
-- Keep normal answers concise and fast.
-- For current, recent, latest, today's, live, changing,
-  news, weather, scores, prices, or events, USE GOOGLE SEARCH.
-- When Google Search is enabled for a request, actually use the
-  search results to answer the user.
-- Do not answer a current-information question from old knowledge.
-- If the user asks for today's/latest news, search the web first
-  and summarize the relevant current results.
-- For normal/general questions, answer directly without web search.
-- If the user talks about emotions or personal difficulties,
-  respond with empathy and safe supportive guidance.
-- Never claim to be human.
-- Emotion prediction is not a medical diagnosis.
+Understand:
+- spelling mistakes
+- typing mistakes
+- abbreviations
+- informal English
+- Tanglish
+
+Answer the user's intended question directly.
+Keep answers concise.
+
+For current/latest/today/news/weather/live questions,
+use Google Search when available.
+
+If the user talks about emotions or personal difficulties,
+respond with empathy and safe supportive guidance.
+
+Never claim to be human.
+Emotion prediction is not a medical diagnosis.
 """
 
     prompt = f"""
@@ -167,11 +166,6 @@ IMPORTANT:
 
 User message:
 {message}
-
-If this is a current/latest/today/news/live question, use Google Search
-and give the user a concise answer based on the current search results.
-
-Otherwise answer the user's intended question directly.
 """
 
     try:
@@ -206,13 +200,11 @@ Otherwise answer the user's intended question directly.
             "input": prompt
         }
 
-        # Current/latest information → Google Search
         if use_search:
             interaction_args["tools"] = [
                 {"type": "google_search"}
             ]
 
-        # Continue previous conversation
         if previous_id:
             interaction_args["previous_interaction_id"] = previous_id
 
@@ -231,15 +223,15 @@ Otherwise answer the user's intended question directly.
 
     except Exception as e:
 
-    print("CHATBOT ERROR:")
-    print(str(e))
+        print("CHATBOT ERROR:")
+        print(str(e))
 
-    error_text = str(e).lower()
+        error_text = str(e).lower()
 
-    if "429" in error_text or "quota" in error_text or "too_many_requests" in error_text:
-        return "AI service quota is temporarily exceeded. Please try again later."
+        if "429" in error_text or "quota" in error_text or "too_many_requests" in error_text:
+            return "AI service quota is temporarily exceeded. Please try again later."
 
-    return "Sorry, I couldn't process your message right now."
+        return "Sorry, I couldn't process your message right now."
 
 
 # =========================================================
