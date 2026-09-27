@@ -5,3 +5,4 @@ numpy
 librosa
 soundfile
 huggingface_hub
+google-genai
