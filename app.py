@@ -138,37 +138,114 @@ def chatbot():
     if gemini_client is None:
         return "AI chatbot is not configured yet."
 
+    # =====================================================
+    # EMOTIONAI SYSTEM INSTRUCTION
+    # =====================================================
+
     system_instruction = """
-You are EmotionAI, a fast and friendly AI assistant.
+You are EmotionAI, a fast, friendly and intelligent AI assistant.
 
-Understand:
-- spelling mistakes
-- typing mistakes
-- abbreviations
-- informal English
-- Tanglish
+LANGUAGE UNDERSTANDING:
+- Understand normal English.
+- Understand Tanglish.
+- Understand informal English.
+- Understand abbreviations.
+- Understand spelling mistakes and typing mistakes.
+- Infer the user's intended meaning.
+- Never criticize spelling mistakes.
+- If the user writes Tamil using English letters, understand it.
 
-Answer the user's intended question directly.
-Keep answers concise.
+ANSWER STYLE:
+- Answer the user's actual question directly.
+- Keep simple questions concise.
+- Give useful explanations when the question needs explanation.
+- Do not unnecessarily repeat the user's question.
+- Do not say that you are unable to understand because of spelling mistakes.
+- Never claim to be human.
 
-For current/latest/today/news/weather/live questions,
-use Google Search when available.
+CURRENT INFORMATION:
+For questions containing or meaning:
+- latest
+- today
+- current
+- now
+- recent
+- news
+- weather
+- live
+- current price
+- current score
+- today's events
+- 2026 information
 
+use Google Search.
+
+IMPORTANT:
+When Google Search is available, use the search results
+instead of relying only on old knowledge.
+
+WEATHER:
+If the user asks something like:
+- Chennai weather today
+- weather in Chennai
+- Chennai temperature now
+- will it rain in Chennai today
+
+use Google Search and provide the current/relevant weather information.
+
+NEWS:
+If the user asks:
+- latest news
+- today's news
+- latest technology news
+- latest India news
+- latest Chennai news
+
+use Google Search and summarize the relevant current results.
+
+CONVERSATION:
+Remember the previous conversation when previous context is available.
+If the user says:
+- explain more
+- why
+- what about this
+- tell me more
+- continue
+understand that it refers to the previous conversation.
+
+EMOTION:
 If the user talks about emotions or personal difficulties,
 respond with empathy and safe supportive guidance.
 
-Never claim to be human.
+PROJECT:
+If the user asks about EmotionAI, speech emotion recognition,
+AI, Flask, Python, or the project, explain clearly and simply.
+
+IMPORTANT:
 Emotion prediction is not a medical diagnosis.
 """
+
+    # =====================================================
+    # USER PROMPT
+    # =====================================================
 
     prompt = f"""
 {system_instruction}
 
-User message:
+User's message:
 {message}
+
+Understand the user's intended meaning even if there are
+spelling mistakes or Tanglish.
+
+Answer directly.
 """
 
     try:
+
+        # =================================================
+        # DETECT CURRENT INFORMATION QUESTIONS
+        # =================================================
 
         message_lower = message.lower()
 
@@ -180,11 +257,15 @@ User message:
             "recent",
             "news",
             "weather",
+            "temperature",
+            "rain",
+            "forecast",
             "live",
             "price",
             "score",
             "scores",
             "event",
+            "events",
             "2026"
         ]
 
@@ -193,33 +274,70 @@ User message:
             for word in search_words
         )
 
+        # =================================================
+        # PREVIOUS CONVERSATION
+        # =================================================
+
         previous_id = session.get("previous_interaction_id")
+
+        # =================================================
+        # GEMINI REQUEST
+        # =================================================
 
         interaction_args = {
             "model": "gemini-3.8-flash",
             "input": prompt
         }
 
+        # =================================================
+        # GOOGLE SEARCH FOR CURRENT INFORMATION
+        # =================================================
+
         if use_search:
+
             interaction_args["tools"] = [
-                {"type": "google_search"}
+                {
+                    "type": "google_search"
+                }
             ]
 
+        # =================================================
+        # CONTINUE CONVERSATION
+        # =================================================
+
         if previous_id:
+
             interaction_args["previous_interaction_id"] = previous_id
+
+        # =================================================
+        # SEND REQUEST
+        # =================================================
 
         interaction = gemini_client.interactions.create(
             **interaction_args
         )
 
+        # =================================================
+        # SAVE CONVERSATION CONTEXT
+        # =================================================
+
         session["previous_interaction_id"] = interaction.id
+
+        # =================================================
+        # GET ANSWER
+        # =================================================
 
         answer = interaction.output_text
 
         if not answer:
+
             return "I couldn't generate a response. Please try again."
 
         return answer
+
+    # =====================================================
+    # ERROR HANDLING
+    # =====================================================
 
     except Exception as e:
 
@@ -228,11 +346,33 @@ User message:
 
         error_text = str(e).lower()
 
-        if "429" in error_text or "quota" in error_text or "too_many_requests" in error_text:
-            return "AI service quota is temporarily exceeded. Please try again later."
+        # Gemini quota exceeded
+        if (
+            "429" in error_text
+            or "quota" in error_text
+            or "too_many_requests" in error_text
+        ):
 
-        return "Sorry, I couldn't process your message right now."
+            return (
+                "AI service quota is temporarily exceeded. "
+                "Please try again later."
+            )
 
+        # API / connection error
+        if (
+            "timeout" in error_text
+            or "connection" in error_text
+            or "network" in error_text
+        ):
+
+            return (
+                "The AI service is taking too long to respond. "
+                "Please try again."
+            )
+
+        return (
+            "Sorry, I couldn't process your message right now."
+        )
 
 # =========================================================
 # CONVERT AUDIO TO WAV
