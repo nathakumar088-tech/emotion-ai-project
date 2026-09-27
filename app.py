@@ -52,7 +52,7 @@ def get_emotion_session():
 
 
 # =========================================================
-# EMOTION LABELS
+# OFFICIAL EMOTION LABELS
 # =========================================================
 
 emotion_names = {
@@ -65,6 +65,17 @@ emotion_names = {
     "SAD": "Sad",
     "SUR": "Surprised"
 }
+
+LABELS = [
+    "ANG",
+    "CAL",
+    "DIS",
+    "FEA",
+    "HAP",
+    "NEU",
+    "SAD",
+    "SUR"
+]
 
 
 # =========================================================
@@ -183,12 +194,19 @@ def convert_to_wav(input_path):
                 "-y",
                 "-i",
                 input_path,
+
+                # Mono
                 "-ac",
                 "1",
+
+                # Official model sampling rate
                 "-ar",
                 "16000",
-                "-sample_fmt",
-                "s16",
+
+                # Standard PCM WAV
+                "-c:a",
+                "pcm_s16le",
+
                 output_path
             ],
             check=True,
@@ -235,7 +253,11 @@ def prepare_audio(file_path):
 
     print("Preparing audio...")
 
-    # Load exactly at 16 kHz and mono.
+    # -----------------------------------------------------
+    # Official model expects 16 kHz audio.
+    # Mono audio is used for Wav2Vec2.
+    # -----------------------------------------------------
+
     audio, sample_rate = librosa.load(
         file_path,
         sr=16000,
@@ -248,38 +270,15 @@ def prepare_audio(file_path):
             "Audio file is empty."
         )
 
-    audio = audio.astype(np.float32)
-
-    # Remove leading/trailing silence.
-    trimmed_audio, _ = librosa.effects.trim(
+    audio = np.asarray(
         audio,
-        top_db=40
+        dtype=np.float32
     )
 
-    if len(trimmed_audio) > 0:
-        audio = trimmed_audio
+    # -----------------------------------------------------
+    # Remove NaN / Infinity values before processing.
+    # -----------------------------------------------------
 
-    # Keep the most recent recording within 10 seconds.
-    max_samples = 16000 * 10
-
-    if len(audio) > max_samples:
-        audio = audio[:max_samples]
-
-    # Wav2Vec2 feature extractor uses waveform normalization.
-    mean = float(np.mean(audio))
-    std = float(np.std(audio))
-
-    if std > 1e-7:
-
-        audio = (audio - mean) / std
-
-    else:
-
-        audio = audio - mean
-
-    audio = audio.astype(np.float32)
-
-    # Safety check.
     audio = np.nan_to_num(
         audio,
         nan=0.0,
@@ -287,15 +286,139 @@ def prepare_audio(file_path):
         neginf=0.0
     )
 
-    print("Sample rate:", sample_rate)
-    print("Samples:", len(audio))
-    print("Duration:", round(len(audio) / 16000, 3), "seconds")
-    print("Audio mean:", float(np.mean(audio)))
-    print("Audio std:", float(np.std(audio)))
-    print("Audio min:", float(np.min(audio)))
-    print("Audio max:", float(np.max(audio)))
+    # -----------------------------------------------------
+    # Maximum input length: 10 seconds.
+    #
+    # Do NOT trim silence.
+    # The model should receive the original waveform
+    # instead of changing its timing/content.
+    # -----------------------------------------------------
+
+    max_samples = 16000 * 10
+
+    if len(audio) > max_samples:
+
+        print(
+            "Audio longer than 10 seconds."
+        )
+
+        audio = audio[:max_samples]
+
+    # -----------------------------------------------------
+    # Wav2Vec2FeatureExtractor official config:
+    #
+    # do_normalize = true
+    # sampling_rate = 16000
+    #
+    # For a single audio sample, normalize the complete
+    # waveform to approximately zero mean / unit variance.
+    # -----------------------------------------------------
+
+    mean = float(np.mean(audio))
+
+    variance = float(
+        np.mean(
+            (audio - mean) ** 2
+        )
+    )
+
+    audio = (
+        audio - mean
+    ) / np.sqrt(
+        variance + 1e-7
+    )
+
+    audio = np.asarray(
+        audio,
+        dtype=np.float32
+    )
+
+    # Final safety cleanup.
+    audio = np.nan_to_num(
+        audio,
+        nan=0.0,
+        posinf=0.0,
+        neginf=0.0
+    )
+
+    print("--------------------------------")
+    print("AUDIO PREPROCESSING")
+    print("--------------------------------")
+
+    print(
+        "Sample rate:",
+        sample_rate
+    )
+
+    print(
+        "Samples:",
+        len(audio)
+    )
+
+    print(
+        "Duration:",
+        round(
+            len(audio) / 16000,
+            3
+        ),
+        "seconds"
+    )
+
+    print(
+        "Audio mean:",
+        float(np.mean(audio))
+    )
+
+    print(
+        "Audio std:",
+        float(np.std(audio))
+    )
+
+    print(
+        "Audio min:",
+        float(np.min(audio))
+    )
+
+    print(
+        "Audio max:",
+        float(np.max(audio))
+    )
+
+    print("--------------------------------")
 
     return audio
+
+
+# =========================================================
+# SOFTMAX
+# =========================================================
+
+def stable_softmax(logits):
+
+    logits = np.asarray(
+        logits,
+        dtype=np.float64
+    )
+
+    maximum = np.max(logits)
+
+    exp_values = np.exp(
+        logits - maximum
+    )
+
+    total = np.sum(exp_values)
+
+    if total <= 0 or not np.isfinite(total):
+
+        raise RuntimeError(
+            "Invalid model probability output."
+        )
+
+    probabilities = (
+        exp_values / total
+    )
+
+    return probabilities
 
 
 # =========================================================
@@ -306,18 +429,34 @@ def predict_emotion(file_path):
 
     session = get_emotion_session()
 
-    audio = prepare_audio(file_path)
+    audio = prepare_audio(
+        file_path
+    )
 
     input_info = session.get_inputs()[0]
 
     input_name = input_info.name
 
-    print("ONNX input name:", input_name)
-    print("ONNX input shape:", input_info.shape)
-    print("ONNX input type:", input_info.type)
+    print(
+        "ONNX input name:",
+        input_name
+    )
 
-    # Wav2Vec2 expects:
+    print(
+        "ONNX input shape:",
+        input_info.shape
+    )
+
+    print(
+        "ONNX input type:",
+        input_info.type
+    )
+
+    # -----------------------------------------------------
+    # Wav2Vec2 input:
+    #
     # [batch_size, sequence_length]
+    # -----------------------------------------------------
 
     input_data = np.expand_dims(
         audio,
@@ -344,7 +483,10 @@ def predict_emotion(file_path):
         float(input_data.max())
     )
 
-    # Run ONNX model.
+    # -----------------------------------------------------
+    # Run ONNX model
+    # -----------------------------------------------------
+
     outputs = session.run(
         None,
         {
@@ -352,76 +494,89 @@ def predict_emotion(file_path):
         }
     )
 
-    print("ONNX prediction completed.")
-    print("Number of outputs:", len(outputs))
+    print(
+        "ONNX prediction completed."
+    )
 
-    logits = np.asarray(outputs[0])
+    print(
+        "Number of outputs:",
+        len(outputs)
+    )
 
-    logits = np.squeeze(logits)
+    if len(outputs) == 0:
 
-    print("Raw model output:", logits)
+        raise RuntimeError(
+            "ONNX model returned no output."
+        )
+
+    # -----------------------------------------------------
+    # Extract logits
+    # -----------------------------------------------------
+
+    logits = np.asarray(
+        outputs[0]
+    )
+
+    logits = np.squeeze(
+        logits
+    )
+
+    print(
+        "Raw model output:",
+        logits
+    )
+
+    # -----------------------------------------------------
+    # Model has exactly 8 emotion classes.
+    # -----------------------------------------------------
 
     if logits.size != 8:
 
         raise RuntimeError(
-            f"Unexpected model output size: {logits.size}. "
-            f"Expected 8 emotion scores."
+            f"Unexpected model output size: "
+            f"{logits.size}. Expected 8."
         )
 
-    logits = logits.astype(np.float64)
-
-    # -----------------------------------------------------
-    # Official model label order
-    # -----------------------------------------------------
-
-    labels = [
-        "ANG",
-        "CAL",
-        "DIS",
-        "FEA",
-        "HAP",
-        "NEU",
-        "SAD",
-        "SUR"
-    ]
-
-    # -----------------------------------------------------
-    # Stable softmax
-    # -----------------------------------------------------
-
-    shifted_logits = (
-        logits - np.max(logits)
+    logits = logits.astype(
+        np.float64
     )
 
-    exp_values = np.exp(
-        shifted_logits
+    # -----------------------------------------------------
+    # Convert logits -> probabilities
+    # -----------------------------------------------------
+
+    probabilities = stable_softmax(
+        logits
     )
 
-    probabilities = (
-        exp_values /
-        np.sum(exp_values)
-    )
+    # -----------------------------------------------------
+    # Create emotion results
+    # -----------------------------------------------------
 
     results = []
 
-    for label, probability in zip(
-        labels,
-        probabilities
-    ):
+    for index, label in enumerate(LABELS):
+
+        probability = float(
+            probabilities[index]
+        )
 
         results.append(
             {
                 "label": label,
-                "score": float(probability)
+                "score": probability
             }
         )
 
+    # Highest probability first.
     results.sort(
         key=lambda x: x["score"],
         reverse=True
     )
 
-    print("Emotion results:")
+    print("--------------------------------")
+    print("EMOTION RESULTS")
+    print("--------------------------------")
 
     for result in results:
 
@@ -433,6 +588,8 @@ def predict_emotion(file_path):
             ),
             "%"
         )
+
+    print("--------------------------------")
 
     return results
 
@@ -854,7 +1011,13 @@ def upload():
 # =========================================================
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+
+    port = int(
+        os.environ.get(
+            "PORT",
+            10000
+        )
+    )
 
     app.run(
         host="0.0.0.0",
