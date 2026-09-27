@@ -5,6 +5,7 @@ import numpy as np
 import librosa
 import onnxruntime as ort
 from huggingface_hub import hf_hub_download
+from google import genai
 
 app = Flask(__name__)
 
