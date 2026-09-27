@@ -248,16 +248,15 @@ def convert_to_wav(input_path):
 # =========================================================
 # AUDIO PREPROCESSING
 # =========================================================
+# =========================================================
+# AUDIO PREPROCESSING
+# =========================================================
 
 def prepare_audio(file_path):
 
     print("Preparing audio...")
 
-    # -----------------------------------------------------
-    # Official model expects 16 kHz audio.
-    # Mono audio is used for Wav2Vec2.
-    # -----------------------------------------------------
-
+    # Load audio exactly at 16 kHz mono
     audio, sample_rate = librosa.load(
         file_path,
         sr=16000,
@@ -265,20 +264,11 @@ def prepare_audio(file_path):
     )
 
     if audio is None or len(audio) == 0:
+        raise RuntimeError("Audio file is empty.")
 
-        raise RuntimeError(
-            "Audio file is empty."
-        )
+    audio = np.asarray(audio, dtype=np.float32)
 
-    audio = np.asarray(
-        audio,
-        dtype=np.float32
-    )
-
-    # -----------------------------------------------------
-    # Remove NaN / Infinity values before processing.
-    # -----------------------------------------------------
-
+    # Remove invalid values
     audio = np.nan_to_num(
         audio,
         nan=0.0,
@@ -286,54 +276,28 @@ def prepare_audio(file_path):
         neginf=0.0
     )
 
-    # -----------------------------------------------------
-    # Maximum input length: 10 seconds.
-    #
-    # Do NOT trim silence.
-    # The model should receive the original waveform
-    # instead of changing its timing/content.
-    # -----------------------------------------------------
-
+    # Maximum 10 seconds
     max_samples = 16000 * 10
 
     if len(audio) > max_samples:
-
-        print(
-            "Audio longer than 10 seconds."
-        )
-
+        print("Audio longer than 10 seconds. Trimming to 10 seconds.")
         audio = audio[:max_samples]
 
     # -----------------------------------------------------
-    # Wav2Vec2FeatureExtractor official config:
-    #
-    # do_normalize = true
-    # sampling_rate = 16000
-    #
-    # For a single audio sample, normalize the complete
-    # waveform to approximately zero mean / unit variance.
+    # Wav2Vec2 official feature extractor normalization
     # -----------------------------------------------------
 
-    mean = float(np.mean(audio))
+    mean = np.mean(audio)
+    std = np.std(audio)
 
-    variance = float(
-        np.mean(
-            (audio - mean) ** 2
-        )
-    )
+    if std > 1e-7:
+        audio = (audio - mean) / std
+    else:
+        audio = audio - mean
 
-    audio = (
-        audio - mean
-    ) / np.sqrt(
-        variance + 1e-7
-    )
+    audio = audio.astype(np.float32)
 
-    audio = np.asarray(
-        audio,
-        dtype=np.float32
-    )
-
-    # Final safety cleanup.
+    # Final cleanup
     audio = np.nan_to_num(
         audio,
         nan=0.0,
@@ -344,46 +308,17 @@ def prepare_audio(file_path):
     print("--------------------------------")
     print("AUDIO PREPROCESSING")
     print("--------------------------------")
-
-    print(
-        "Sample rate:",
-        sample_rate
-    )
-
-    print(
-        "Samples:",
-        len(audio)
-    )
-
+    print("Sample rate:", sample_rate)
+    print("Samples:", len(audio))
     print(
         "Duration:",
-        round(
-            len(audio) / 16000,
-            3
-        ),
+        round(len(audio) / 16000, 3),
         "seconds"
     )
-
-    print(
-        "Audio mean:",
-        float(np.mean(audio))
-    )
-
-    print(
-        "Audio std:",
-        float(np.std(audio))
-    )
-
-    print(
-        "Audio min:",
-        float(np.min(audio))
-    )
-
-    print(
-        "Audio max:",
-        float(np.max(audio))
-    )
-
+    print("Audio mean:", float(np.mean(audio)))
+    print("Audio std:", float(np.std(audio)))
+    print("Audio min:", float(np.min(audio)))
+    print("Audio max:", float(np.max(audio)))
     print("--------------------------------")
 
     return audio
