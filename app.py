@@ -1,3 +1,4 @@
+```python
 from flask import Flask, render_template, request
 import os
 import subprocess
@@ -8,9 +9,9 @@ from huggingface_hub import hf_hub_download
 
 app = Flask(__name__)
 
-# ==============================
+# =========================================================
 # UPLOAD FOLDER
-# ==============================
+# =========================================================
 
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -18,9 +19,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# ==============================
+# =========================================================
 # AI EMOTION MODEL
-# ==============================
+# =========================================================
 
 MODEL_REPO = "onnx-community/Speech-Emotion-Classification-ONNX"
 MODEL_FILE = "onnx/model_int8.onnx"
@@ -51,9 +52,9 @@ def get_emotion_session():
     return emotion_session
 
 
-# ==============================
+# =========================================================
 # EMOTION LABELS
-# ==============================
+# =========================================================
 
 emotion_names = {
     "ANG": "Angry",
@@ -67,29 +68,27 @@ emotion_names = {
 }
 
 
-# ==============================
+# =========================================================
 # HOME PAGE
-# ==============================
+# =========================================================
 
 @app.route("/")
 def home():
-
     return render_template("index.html")
 
 
-# ==============================
+# =========================================================
 # ANALYSIS PAGE
-# ==============================
+# =========================================================
 
 @app.route("/analysis")
 def analysis():
-
     return render_template("analysis.html")
 
 
-# ==============================
-# EMOTION-AWARE CHATBOT
-# ==============================
+# =========================================================
+# CHATBOT
+# =========================================================
 
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
@@ -101,40 +100,46 @@ def chatbot():
 
     text = message.lower()
 
-    if any(
-        word in text
-        for word in ["happy", "good", "great", "excited"]
-    ):
+    if any(word in text for word in [
+        "happy",
+        "good",
+        "great",
+        "excited"
+    ]):
 
         reply = (
             "That's nice to hear! 😊 "
             "What made you feel this way?"
         )
 
-    elif any(
-        word in text
-        for word in ["sad", "upset", "bad", "lonely"]
-    ):
+    elif any(word in text for word in [
+        "sad",
+        "upset",
+        "bad",
+        "lonely"
+    ]):
 
         reply = (
             "I'm sorry you're having a difficult moment. "
             "You can talk about what's bothering you."
         )
 
-    elif any(
-        word in text
-        for word in ["angry", "mad", "frustrated"]
-    ):
+    elif any(word in text for word in [
+        "angry",
+        "mad",
+        "frustrated"
+    ]):
 
         reply = (
             "It sounds like something is frustrating you. "
             "Taking a short pause and talking about it may help."
         )
 
-    elif any(
-        word in text
-        for word in ["hello", "hi", "hey"]
-    ):
+    elif any(word in text for word in [
+        "hello",
+        "hi",
+        "hey"
+    ]):
 
         reply = (
             "Hello! 👋 "
@@ -152,9 +157,9 @@ def chatbot():
     return reply
 
 
-# ==============================
-# CONVERT WEBM/OTHER AUDIO TO WAV
-# ==============================
+# =========================================================
+# CONVERT AUDIO TO WAV
+# =========================================================
 
 def convert_to_wav(input_path):
 
@@ -223,9 +228,80 @@ def convert_to_wav(input_path):
     return output_path
 
 
-# ==============================
+# =========================================================
 # AUDIO PREPROCESSING
-# ==============================
+# =========================================================
+
+def prepare_audio(file_path):
+
+    print("Preparing audio...")
+
+    # Load exactly at 16 kHz and mono.
+    audio, sample_rate = librosa.load(
+        file_path,
+        sr=16000,
+        mono=True
+    )
+
+    if audio is None or len(audio) == 0:
+
+        raise RuntimeError(
+            "Audio file is empty."
+        )
+
+    audio = audio.astype(np.float32)
+
+    # Remove leading/trailing silence.
+    trimmed_audio, _ = librosa.effects.trim(
+        audio,
+        top_db=40
+    )
+
+    if len(trimmed_audio) > 0:
+        audio = trimmed_audio
+
+    # Keep the most recent recording within 10 seconds.
+    max_samples = 16000 * 10
+
+    if len(audio) > max_samples:
+        audio = audio[:max_samples]
+
+    # Wav2Vec2 feature extractor uses waveform normalization.
+    mean = float(np.mean(audio))
+    std = float(np.std(audio))
+
+    if std > 1e-7:
+
+        audio = (audio - mean) / std
+
+    else:
+
+        audio = audio - mean
+
+    audio = audio.astype(np.float32)
+
+    # Safety check.
+    audio = np.nan_to_num(
+        audio,
+        nan=0.0,
+        posinf=0.0,
+        neginf=0.0
+    )
+
+    print("Sample rate:", sample_rate)
+    print("Samples:", len(audio))
+    print("Duration:", round(len(audio) / 16000, 3), "seconds")
+    print("Audio mean:", float(np.mean(audio)))
+    print("Audio std:", float(np.std(audio)))
+    print("Audio min:", float(np.min(audio)))
+    print("Audio max:", float(np.max(audio)))
+
+    return audio
+
+
+# =========================================================
+# AI EMOTION PREDICTION
+# =========================================================
 
 def predict_emotion(file_path):
 
@@ -234,20 +310,42 @@ def predict_emotion(file_path):
     audio = prepare_audio(file_path)
 
     input_info = session.get_inputs()[0]
+
     input_name = input_info.name
 
     print("ONNX input name:", input_name)
     print("ONNX input shape:", input_info.shape)
     print("ONNX input type:", input_info.type)
 
-    # Wav2Vec2 expects [batch, audio_samples]
+    # Wav2Vec2 expects:
+    # [batch_size, sequence_length]
+
     input_data = np.expand_dims(
         audio,
         axis=0
     ).astype(np.float32)
 
-    print("Input data shape:", input_data.shape)
+    print(
+        "FINAL AUDIO SHAPE:",
+        input_data.shape
+    )
 
+    print(
+        "FINAL AUDIO DTYPE:",
+        input_data.dtype
+    )
+
+    print(
+        "FINAL AUDIO MIN:",
+        float(input_data.min())
+    )
+
+    print(
+        "FINAL AUDIO MAX:",
+        float(input_data.max())
+    )
+
+    # Run ONNX model.
     outputs = session.run(
         None,
         {
@@ -259,11 +357,13 @@ def predict_emotion(file_path):
     print("Number of outputs:", len(outputs))
 
     logits = np.asarray(outputs[0])
+
     logits = np.squeeze(logits)
 
     print("Raw model output:", logits)
 
     if logits.size != 8:
+
         raise RuntimeError(
             f"Unexpected model output size: {logits.size}. "
             f"Expected 8 emotion scores."
@@ -271,14 +371,10 @@ def predict_emotion(file_path):
 
     logits = logits.astype(np.float64)
 
-    # Stable softmax
-    logits = logits - np.max(logits)
-
-    exp_values = np.exp(logits)
-
-    probabilities = exp_values / np.sum(exp_values)
-
+    # -----------------------------------------------------
     # Official model label order
+    # -----------------------------------------------------
+
     labels = [
         "ANG",
         "CAL",
@@ -290,99 +386,22 @@ def predict_emotion(file_path):
         "SUR"
     ]
 
-    results = []
+    # -----------------------------------------------------
+    # Stable softmax
+    # -----------------------------------------------------
 
-    for label, probability in zip(
-        labels,
-        probabilities
-    ):
-        results.append({
-            "label": label,
-            "score": float(probability)
-        })
-
-    results.sort(
-        key=lambda x: x["score"],
-        reverse=True
+    shifted_logits = (
+        logits - np.max(logits)
     )
 
-    print("Emotion results:")
-
-    for result in results:
-        print(
-            result["label"],
-            round(result["score"] * 100, 2),
-            "%"
-        )
-
-    return results
-
-# ==============================
-# AI PREDICTION
-# ==============================
-
-def predict_emotion(file_path):
-
-    session = get_emotion_session()
-
-    audio = prepare_audio(file_path)
-
-    input_name = session.get_inputs()[0].name
-
-    print("ONNX input name:", input_name)
-    print("ONNX input shape:", session.get_inputs()[0].shape)
-
-    input_data = np.expand_dims(
-        audio,
-        axis=0
-    ).astype(np.float32)
-
-    outputs = session.run(
-        None,
-        {
-            input_name: input_data
-        }
+    exp_values = np.exp(
+        shifted_logits
     )
-
-    print("ONNX prediction completed.")
-
-    logits = np.asarray(outputs[0])
-
-    # Remove batch / extra dimensions.
-    logits = np.squeeze(logits)
-
-    print("Raw model output:", logits)
-
-    # This model must return 8 emotion scores.
-    if logits.size != 8:
-        raise RuntimeError(
-            f"Unexpected model output size: {logits.size}. "
-            "Expected 8 emotion scores."
-        )
-
-    logits = logits.astype(np.float64)
-
-    # Stable softmax.
-    logits = logits - np.max(logits)
-
-    exp_values = np.exp(logits)
 
     probabilities = (
         exp_values /
         np.sum(exp_values)
     )
-
-    # Official model label order.
-    labels = [
-        "ANG",
-        "CAL",
-        "DIS",
-        "FEA",
-        "HAP",
-        "NEU",
-        "SAD",
-        "SUR"
-    ]
 
     results = []
 
@@ -406,18 +425,22 @@ def predict_emotion(file_path):
     print("Emotion results:")
 
     for result in results:
+
         print(
             result["label"],
-            round(result["score"] * 100, 2),
+            round(
+                result["score"] * 100,
+                2
+            ),
             "%"
         )
 
     return results
 
 
-# ==============================
+# =========================================================
 # AUDIO UPLOAD + AI ANALYSIS
-# ==============================
+# =========================================================
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -438,7 +461,6 @@ def upload():
 
     original_filename = audio.filename
 
-    # Make safe filename
     safe_filename = os.path.basename(
         original_filename
     )
@@ -450,15 +472,15 @@ def upload():
 
     audio.save(file_path)
 
-    print("Audio saved:", file_path)
-
-    converted_path = None
+    print(
+        "Audio saved:",
+        file_path
+    )
 
     try:
 
-        # ==================================
-        # WEBM / OGG / MP3 -> WAV
-        # ==================================
+        # Convert browser recording to
+        # 16 kHz mono WAV.
 
         converted_path = convert_to_wav(
             file_path
@@ -469,9 +491,7 @@ def upload():
             converted_path
         )
 
-        # ==================================
-        # AI ANALYSIS
-        # ==================================
+        # AI prediction.
 
         results = predict_emotion(
             converted_path
@@ -489,9 +509,9 @@ def upload():
             f"Error analyzing audio: {str(e)}"
         )
 
-    # ==============================
-    # EMOTION RESULTS
-    # ==============================
+    # =====================================================
+    # EMOTION RESULT CARDS
+    # =====================================================
 
     emotion_html = ""
 
@@ -533,9 +553,9 @@ def upload():
         </div>
         """
 
-    # ==============================
+    # =====================================================
     # TOP EMOTION
-    # ==============================
+    # =====================================================
 
     top_label = results[0]["label"]
 
@@ -546,9 +566,9 @@ def upload():
 
     top_score = results[0]["score"] * 100
 
-    # ==============================
+    # =====================================================
     # RESULT PAGE
-    # ==============================
+    # =====================================================
 
     return f"""
 <!DOCTYPE html>
@@ -749,27 +769,22 @@ def upload():
         @media (max-width: 600px) {{
 
             body {{
-
                 padding: 12px;
             }}
 
             .container {{
-
                 margin: 15px auto;
             }}
 
             .result-box {{
-
                 padding: 22px;
             }}
 
             h1 {{
-
                 font-size: 27px;
             }}
 
             .main-emotion {{
-
                 font-size: 34px;
             }}
 
@@ -806,7 +821,7 @@ def upload():
                 </div>
 
                 <div class="main-score">
-                    Confidence: {top_score:.2f}%
+                    Model confidence: {top_score:.2f}%
                 </div>
 
             </div>
@@ -835,9 +850,9 @@ def upload():
 """
 
 
-# ==============================
+# =========================================================
 # RUN FLASK
-# ==============================
+# =========================================================
 
 if __name__ == "__main__":
 
@@ -850,3 +865,27 @@ if __name__ == "__main__":
             )
         )
     )
+```
+
+### Ippo enna pannanum
+
+**1.** GitHub → `app.py` → Edit
+**2.** `Ctrl + A` → மேலே கொடுத்த **full code மட்டும்** paste பண்ணு.
+**3.** `Commit changes` பண்ணு.
+**4.** Render automatic deploy ஆகட்டும்.
+**5.** `Live` ஆனதும் phone-la test பண்ணு.
+
+இந்த version-ல்:
+
+* duplicate `predict_emotion()` ❌ removed
+* indentation error ❌ removed
+* missing `prepare_audio()` ✅ added
+* 16 kHz mono ✅
+* model-required waveform normalization ✅
+* correct 8-label mapping ✅
+* stable softmax ✅
+* input shape/type/min/max logs ✅
+
+Official model configuration confirms the exact 8-label mapping and the processor configuration specifies 16 kHz with normalization.
+
+**But one honest point:** இந்த code model-ஐ “correct-aa” force செய்யாது. Model training itself has limitations, so a real happy voice can still occasionally be predicted as Sad. இந்த change-ன் goal **wrong code/preprocessing காரணமான error-ஐ remove பண்ணுவது**, not fake the result.
