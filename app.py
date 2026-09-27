@@ -185,46 +185,40 @@ Answer the user's intended question clearly.
             for word in search_words
         )
 
-     if use_search:
+        if use_search:
 
-    previous_id = session.get("previous_interaction_id")
+            previous_id = session.get("previous_interaction_id")
 
-    interaction_args = {
-        "model": "gemini-3.8-flash",
-        "input": prompt,
-        "tools": [
-            {"type": "google_search"}
-        ]
-    }
+            interaction_args = {
+                "model": "gemini-3.8-flash",
+                "input": prompt,
+                "tools": [
+                    {"type": "google_search"}
+                ]
+            }
 
-    if previous_id:
-        interaction_args["previous_interaction_id"] = previous_id
+            if previous_id:
+                interaction_args["previous_interaction_id"] = previous_id
 
-    interaction = gemini_client.interactions.create(**interaction_args)
+            interaction = gemini_client.interactions.create(**interaction_args)
 
-else:
+        else:
 
-    previous_id = session.get("previous_interaction_id")
+            previous_id = session.get("previous_interaction_id")
 
-    interaction_args = {
-        "model": "gemini-3.8-flash",
-        "input": prompt
-    }
+            interaction_args = {
+                "model": "gemini-3.8-flash",
+                "input": prompt
+            }
 
-    if previous_id:
-        interaction_args["previous_interaction_id"] = previous_id
+            if previous_id:
+                interaction_args["previous_interaction_id"] = previous_id
 
-    interaction = gemini_client.interactions.create(**interaction_args)
+            interaction = gemini_client.interactions.create(**interaction_args)
 
+        session["previous_interaction_id"] = interaction.id
 
-session["previous_interaction_id"] = interaction.id
-
-answer = interaction.output_text
-
-if not answer:
-    return "I couldn't generate a response. Please try again."
-
-return answer
+        answer = interaction.output_text
 
         if not answer:
             return "I couldn't generate a response. Please try again."
