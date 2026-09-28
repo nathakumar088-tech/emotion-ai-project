@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>EmotionAI | Human Emotion Understanding</title>
 
     <style>
+
         * {
             margin: 0;
             padding: 0;
@@ -16,12 +21,12 @@
         :root {
             --black: #050505;
             --black2: #0b0b0b;
-            --card: rgba(18, 18, 18, 0.82);
+            --card: rgba(17, 17, 17, 0.90);
             --pink: #ff1493;
             --pink2: #ff3cac;
-            --pink3: #ff72c2;
+            --pink3: #ff70bd;
             --white: #ffffff;
-            --gray: #a7a7a7;
+            --gray: #a5a5a5;
             --border: rgba(255, 20, 147, 0.25);
         }
 
@@ -32,11 +37,24 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             background:
-                radial-gradient(circle at 15% 15%, rgba(255, 20, 147, 0.13), transparent 30%),
-                radial-gradient(circle at 85% 35%, rgba(255, 20, 147, 0.09), transparent 28%),
-                radial-gradient(circle at 50% 100%, rgba(255, 20, 147, 0.10), transparent 35%),
-                var(--black);
-            color: var(--white);
+                radial-gradient(
+                    circle at 15% 15%,
+                    rgba(255, 20, 147, 0.13),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 85% 35%,
+                    rgba(255, 20, 147, 0.08),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    145deg,
+                    #030303,
+                    #080507,
+                    #030303
+                );
+
+            color: white;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -46,159 +64,261 @@
             position: fixed;
             inset: 0;
             pointer-events: none;
+
             background-image:
-                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+                linear-gradient(
+                    rgba(255,255,255,0.018) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.018) 1px,
+                    transparent 1px
+                );
+
             background-size: 55px 55px;
-            mask-image: linear-gradient(to bottom, black, transparent);
-            z-index: -2;
+            z-index: -1;
         }
 
-        /* ================= NAVBAR ================= */
 
-        nav {
-            width: 100%;
-            padding: 18px 6%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        .navbar {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(5, 5, 5, 0.78);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 18px 6%;
+
+            background: rgba(5,5,5,0.82);
+
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border-bottom: 1px solid rgba(255, 20, 147, 0.12);
+
+            border-bottom:
+                1px solid
+                rgba(255,20,147,0.13);
         }
+
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 11px;
-            font-size: 23px;
+            gap: 10px;
+
+            font-size: 22px;
             font-weight: 800;
-            letter-spacing: 0.5px;
         }
+
 
         .logo-icon {
             width: 40px;
             height: 40px;
-            border-radius: 13px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--pink), #ff4fb3);
+
+            border-radius: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #ff55b6
+                );
+
             box-shadow:
-                0 0 18px rgba(255, 20, 147, 0.45),
-                inset 0 0 12px rgba(255,255,255,0.18);
+                0 0 25px
+                rgba(255,20,147,0.4);
+
             font-size: 20px;
         }
+
 
         .logo span {
             color: var(--pink2);
         }
 
+
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 28px;
         }
 
+
         .nav-links a {
-            color: #d9d9d9;
+            color: #d7d7d7;
             text-decoration: none;
+
             font-size: 14px;
             font-weight: 600;
-            transition: 0.3s ease;
+
+            transition: 0.3s;
         }
+
 
         .nav-links a:hover {
             color: var(--pink2);
-            text-shadow: 0 0 12px rgba(255,20,147,0.65);
+
+            text-shadow:
+                0 0 12px
+                rgba(255,20,147,0.6);
         }
+
 
         .nav-ai {
-            padding: 9px 16px;
-            border: 1px solid rgba(255,20,147,0.4);
+            padding: 9px 15px;
+
+            border:
+                1px solid
+                rgba(255,20,147,0.45);
+
             border-radius: 30px;
+
             color: white !important;
-            background: rgba(255,20,147,0.08);
+
+            background:
+                rgba(255,20,147,0.07);
         }
 
-        /* ================= HERO ================= */
+
+        /* =========================
+           HERO
+        ========================= */
 
         .hero {
             width: min(1180px, 90%);
-            margin: auto;
             min-height: 610px;
+
+            margin: auto;
+
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+
+            grid-template-columns:
+                1.1fr
+                0.9fr;
+
             align-items: center;
+
             gap: 50px;
-            padding: 70px 0 80px;
+
+            padding:
+                70px 0
+                80px;
         }
 
-        .hero-content {
+
+        .hero-text {
             position: relative;
         }
+
 
         .small-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 15px;
+
+            padding:
+                8px 15px;
+
+            border:
+                1px solid
+                rgba(255,20,147,0.35);
+
             border-radius: 50px;
-            border: 1px solid rgba(255,20,147,0.35);
-            background: rgba(255,20,147,0.07);
-            color: #ff8acb;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
+
+            background:
+                rgba(255,20,147,0.07);
+
+            color: #ff8dcc;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+
             margin-bottom: 22px;
         }
+
 
         .live-dot {
             width: 7px;
             height: 7px;
+
             border-radius: 50%;
+
             background: var(--pink);
-            box-shadow: 0 0 12px var(--pink);
-            animation: pulse 1.6s infinite;
+
+            box-shadow:
+                0 0 12px
+                var(--pink);
+
+            animation:
+                livePulse 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% {
+
+        @keyframes livePulse {
+
+            0%,100% {
                 opacity: 1;
                 transform: scale(1);
             }
+
             50% {
-                opacity: 0.35;
-                transform: scale(0.75);
+                opacity: .35;
+                transform: scale(.75);
             }
+
         }
 
+
         .hero h1 {
-            font-size: clamp(44px, 6vw, 76px);
+            font-size:
+                clamp(44px, 6vw, 76px);
+
             line-height: 1.02;
+
             letter-spacing: -3px;
+
             margin-bottom: 25px;
+
             font-weight: 900;
         }
 
+
         .hero h1 span {
             color: var(--pink2);
+
             text-shadow:
-                0 0 12px rgba(255,20,147,0.55),
-                0 0 35px rgba(255,20,147,0.25);
+                0 0 15px
+                rgba(255,20,147,.55),
+
+                0 0 40px
+                rgba(255,20,147,.2);
         }
 
+
         .hero p {
-            color: #a9a9a9;
             max-width: 650px;
+
+            color: #a9a9a9;
+
             line-height: 1.8;
+
             font-size: 16px;
+
             margin-bottom: 32px;
         }
+
 
         .hero-buttons {
             display: flex;
@@ -206,125 +326,203 @@
             flex-wrap: wrap;
         }
 
+
         .btn {
             display: inline-flex;
+
             align-items: center;
             justify-content: center;
-            text-decoration: none;
-            padding: 15px 24px;
+
+            padding:
+                15px 24px;
+
             border-radius: 13px;
-            font-weight: 800;
+
+            text-decoration: none;
+
             font-size: 14px;
-            transition: 0.3s ease;
+            font-weight: 800;
+
+            transition: .3s;
         }
+
 
         .btn-primary {
             color: white;
-            background: linear-gradient(135deg, #ff1493, #ff42ad);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #ff43ad
+                );
+
             box-shadow:
-                0 0 22px rgba(255,20,147,0.28),
-                0 10px 35px rgba(255,20,147,0.12);
+                0 0 25px
+                rgba(255,20,147,.25);
         }
 
+
         .btn-primary:hover {
-            transform: translateY(-3px);
+            transform:
+                translateY(-3px);
+
             box-shadow:
-                0 0 35px rgba(255,20,147,0.55),
-                0 14px 40px rgba(255,20,147,0.2);
+                0 0 40px
+                rgba(255,20,147,.5);
         }
+
 
         .btn-outline {
             color: white;
-            border: 1px solid rgba(255,255,255,0.16);
-            background: rgba(255,255,255,0.035);
+
+            border:
+                1px solid
+                rgba(255,255,255,.16);
+
+            background:
+                rgba(255,255,255,.035);
         }
+
 
         .btn-outline:hover {
-            border-color: rgba(255,20,147,0.5);
-            background: rgba(255,20,147,0.07);
-            transform: translateY(-3px);
+            border-color:
+                rgba(255,20,147,.5);
+
+            transform:
+                translateY(-3px);
         }
 
-        /* ================= HERO VISUAL ================= */
+
+        /* =========================
+           HERO VISUAL
+        ========================= */
 
         .hero-visual {
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
 
         .visual-ring {
             width: 360px;
             height: 360px;
+
+            position: relative;
+
             border-radius: 50%;
-            border: 1px solid rgba(255,20,147,0.22);
+
+            border:
+                1px solid
+                rgba(255,20,147,.22);
+
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+
             box-shadow:
-                0 0 80px rgba(255,20,147,0.08),
-                inset 0 0 70px rgba(255,20,147,0.04);
-            animation: float 5s ease-in-out infinite;
+                0 0 90px
+                rgba(255,20,147,.08);
+
+            animation:
+                float 5s ease-in-out infinite;
         }
+
 
         .visual-ring::before,
         .visual-ring::after {
             content: "";
+
             position: absolute;
+
             border-radius: 50%;
-            border: 1px solid rgba(255,20,147,0.12);
+
+            border:
+                1px solid
+                rgba(255,20,147,.12);
         }
+
 
         .visual-ring::before {
             inset: 25px;
         }
 
+
         .visual-ring::after {
             inset: 52px;
         }
 
+
         @keyframes float {
-            0%, 100% {
+
+            0%,100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-12px);
             }
+
         }
+
 
         .brain {
             width: 175px;
             height: 175px;
+
             border-radius: 45px;
-            background:
-                radial-gradient(circle at 35% 30%, #ff72c2, #ff1493 42%, #870044 100%);
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             font-size: 78px;
+
+            background:
+                radial-gradient(
+                    circle at 35% 30%,
+                    #ff75c3,
+                    #ff1493 45%,
+                    #850042
+                );
+
             box-shadow:
-                0 0 35px rgba(255,20,147,0.55),
-                0 0 100px rgba(255,20,147,0.20);
-            transform: rotate(-5deg);
+                0 0 40px
+                rgba(255,20,147,.55),
+
+                0 0 100px
+                rgba(255,20,147,.18);
+
+            transform:
+                rotate(-5deg);
         }
+
 
         .orbit {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            animation: rotate 15s linear infinite;
+            inset: 0;
+
+            animation:
+                rotate 15s linear infinite;
         }
+
 
         .orbit-dot {
             position: absolute;
+
             width: 10px;
             height: 10px;
+
             border-radius: 50%;
+
             background: var(--pink2);
-            box-shadow: 0 0 15px var(--pink);
+
+            box-shadow:
+                0 0 15px
+                var(--pink);
         }
+
 
         .orbit-dot:nth-child(1) {
             top: 7%;
@@ -346,625 +544,1197 @@
             top: 48%;
         }
 
+
         @keyframes rotate {
+
             from {
                 transform: rotate(0deg);
             }
+
             to {
                 transform: rotate(360deg);
             }
+
         }
 
-        /* ================= EMOTION SECTION ================= */
+
+        /* =========================
+           ANALYSIS SECTION
+        ========================= */
 
         .section {
             width: min(1050px, 90%);
             margin: auto;
-            padding: 30px 0 90px;
+
+            padding:
+                30px 0
+                90px;
         }
+
 
         .section-heading {
             text-align: center;
+
             margin-bottom: 35px;
         }
+
 
         .section-heading .mini {
             color: var(--pink2);
+
             text-transform: uppercase;
+
             letter-spacing: 3px;
+
             font-size: 11px;
             font-weight: 800;
+
             margin-bottom: 10px;
         }
 
+
         .section-heading h2 {
             font-size: 38px;
+
             margin-bottom: 12px;
         }
 
+
         .section-heading p {
             color: var(--gray);
+
             font-size: 14px;
         }
 
+
         .emotion-card {
             position: relative;
-            background:
-                linear-gradient(145deg, rgba(255,20,147,0.055), rgba(255,255,255,0.018)),
-                var(--card);
-            border: 1px solid var(--border);
-            border-radius: 28px;
+
             padding: 42px;
-            overflow: hidden;
+
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,20,147,.055),
+                    rgba(255,255,255,.018)
+                ),
+                var(--card);
+
+            border:
+                1px solid
+                var(--border);
+
             box-shadow:
-                0 25px 80px rgba(0,0,0,0.45),
-                0 0 45px rgba(255,20,147,0.05);
+                0 25px 80px
+                rgba(0,0,0,.45);
+
+            overflow: hidden;
         }
+
 
         .emotion-card::before {
             content: "";
+
             position: absolute;
+
             width: 250px;
             height: 250px;
+
             border-radius: 50%;
+
             background: var(--pink);
+
             filter: blur(130px);
-            opacity: 0.07;
+
+            opacity: .07;
+
             top: -100px;
             right: -80px;
+
             pointer-events: none;
         }
 
+
         .emotion-top {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                flex-start;
+
             gap: 20px;
+
             margin-bottom: 35px;
         }
 
+
         .emotion-title {
             display: flex;
+
             gap: 17px;
+
             align-items: center;
         }
+
 
         .mic-icon {
             width: 62px;
             height: 62px;
+
             flex-shrink: 0;
-            border-radius: 18px;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
+            border-radius: 18px;
+
             font-size: 29px;
-            background: linear-gradient(145deg, rgba(255,20,147,0.20), rgba(255,20,147,0.04));
-            border: 1px solid rgba(255,20,147,0.35);
-            box-shadow: 0 0 25px rgba(255,20,147,0.12);
+
+            background:
+                rgba(255,20,147,.1);
+
+            border:
+                1px solid
+                rgba(255,20,147,.35);
         }
+
 
         .emotion-title h3 {
             font-size: 22px;
+
             margin-bottom: 6px;
         }
 
+
         .emotion-title p {
             color: #8f8f8f;
+
             font-size: 13px;
+
             line-height: 1.5;
         }
 
+
         .ai-status {
             padding: 8px 13px;
-            border: 1px solid rgba(255,20,147,0.28);
+
+            border:
+                1px solid
+                rgba(255,20,147,.28);
+
             border-radius: 30px;
+
             color: #ff83c6;
+
             font-size: 11px;
             font-weight: 700;
+
             white-space: nowrap;
-            background: rgba(255,20,147,0.05);
         }
+
 
         .record-area {
             display: flex;
             justify-content: center;
-            margin: 10px 0 30px;
+
+            margin:
+                10px 0
+                30px;
         }
+
 
         #recordBtn {
             width: 125px;
             height: 125px;
+
             border-radius: 50%;
-            border: 1px solid rgba(255,20,147,0.45);
+
+            border:
+                1px solid
+                rgba(255,20,147,.45);
+
             background:
-                radial-gradient(circle, #ff3ca9 0%, #ff1493 45%, #83003f 100%);
+                radial-gradient(
+                    circle,
+                    #ff3ca9,
+                    #ff1493 45%,
+                    #83003f
+                );
+
             color: white;
+
             font-size: 36px;
+
             cursor: pointer;
+
             box-shadow:
-                0 0 0 12px rgba(255,20,147,0.05),
-                0 0 0 25px rgba(255,20,147,0.025),
-                0 0 45px rgba(255,20,147,0.38);
-            transition: 0.3s ease;
+                0 0 0 12px
+                rgba(255,20,147,.05),
+
+                0 0 0 25px
+                rgba(255,20,147,.025),
+
+                0 0 45px
+                rgba(255,20,147,.38);
+
+            transition: .3s;
         }
+
 
         #recordBtn:hover {
             transform: scale(1.06);
+
             box-shadow:
-                0 0 0 15px rgba(255,20,147,0.06),
-                0 0 0 30px rgba(255,20,147,0.025),
-                0 0 65px rgba(255,20,147,0.55);
+                0 0 0 15px
+                rgba(255,20,147,.06),
+
+                0 0 0 30px
+                rgba(255,20,147,.025),
+
+                0 0 65px
+                rgba(255,20,147,.55);
         }
+
 
         #recordBtn.recording {
-            animation: recordingPulse 1.2s infinite;
+            animation:
+                recordingPulse 1.2s infinite;
         }
 
+
         @keyframes recordingPulse {
-            0%, 100% {
+
+            0%,100% {
                 box-shadow:
-                    0 0 0 12px rgba(255,20,147,0.06),
-                    0 0 35px rgba(255,20,147,0.4);
+                    0 0 0 12px
+                    rgba(255,20,147,.06),
+
+                    0 0 35px
+                    rgba(255,20,147,.4);
             }
+
             50% {
                 box-shadow:
-                    0 0 0 25px rgba(255,20,147,0.04),
-                    0 0 70px rgba(255,20,147,0.7);
+                    0 0 0 25px
+                    rgba(255,20,147,.04),
+
+                    0 0 70px
+                    rgba(255,20,147,.7);
             }
+
         }
+
 
         .or-text {
             text-align: center;
+
             color: #696969;
+
             font-size: 12px;
+
             margin-bottom: 17px;
         }
 
+
         .upload-area {
-            border: 1px dashed rgba(255,20,147,0.32);
+            border:
+                1px dashed
+                rgba(255,20,147,.32);
+
             border-radius: 17px;
+
             padding: 24px;
+
             text-align: center;
-            background: rgba(255,20,147,0.025);
-            transition: 0.3s ease;
+
+            background:
+                rgba(255,20,147,.025);
         }
 
-        .upload-area:hover {
-            border-color: rgba(255,20,147,0.65);
-            background: rgba(255,20,147,0.05);
-        }
 
         .upload-label {
             cursor: pointer;
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 9px;
-            padding: 12px 19px;
+
+            padding:
+                12px 19px;
+
             border-radius: 11px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.10);
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+
             color: #eee;
+
             font-size: 13px;
             font-weight: 700;
-            transition: 0.3s;
         }
 
+
         .upload-label:hover {
-            border-color: rgba(255,20,147,0.45);
+            border-color:
+                rgba(255,20,147,.45);
+
             color: #ff8dca;
         }
+
 
         #audioFile {
             display: none;
         }
 
+
         #fileName {
             display: block;
+
             margin-top: 12px;
+
             color: #777;
+
             font-size: 12px;
         }
+
 
         #audioPreview {
             display: none;
+
             width: 100%;
+
             margin-top: 22px;
         }
 
+
         #analyzeBtn {
             width: 100%;
+
             margin-top: 25px;
+
             padding: 17px;
+
             border: none;
+
             border-radius: 13px;
+
             color: white;
-            background: linear-gradient(135deg, #ff1493, #ff42ad);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #ff42ad
+                );
+
             font-size: 14px;
             font-weight: 800;
+
             cursor: pointer;
-            box-shadow: 0 0 25px rgba(255,20,147,0.18);
-            transition: 0.3s;
         }
 
-        #analyzeBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 35px rgba(255,20,147,0.4);
-        }
 
         #status {
             text-align: center;
+
             margin-top: 14px;
+
             color: #a5a5a5;
+
             font-size: 12px;
+
             min-height: 18px;
         }
 
-        /* ================= CHATBOT ================= */
+
+        /* =====================================================
+           CHATGPT STYLE CHATBOT
+        ===================================================== */
 
         .chatbot-section {
             width: min(1050px, 90%);
-            margin: 0 auto 100px;
+
+            margin:
+                0 auto
+                100px;
         }
+
 
         .chatbot-card {
             position: relative;
+
+            border:
+                1px solid
+                rgba(255,20,147,.25);
+
+            border-radius: 26px;
+
             background:
-                linear-gradient(145deg, rgba(255,20,147,0.065), rgba(255,255,255,0.015)),
-                rgba(14,14,14,0.9);
-            border: 1px solid rgba(255,20,147,0.24);
-            border-radius: 28px;
-            padding: 35px;
+                rgba(12,12,12,.94);
+
             overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+
+            box-shadow:
+                0 25px 80px
+                rgba(0,0,0,.45);
         }
 
-        .chatbot-card::after {
-            content: "";
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            right: -70px;
-            bottom: -100px;
-            background: var(--pink);
-            filter: blur(100px);
-            opacity: 0.08;
-            pointer-events: none;
-        }
+
+        /* CHAT HEADER */
 
         .chat-header {
             display: flex;
+
             align-items: center;
+
             gap: 14px;
-            margin-bottom: 25px;
+
+            padding:
+                22px 25px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.07);
+
+            background:
+                rgba(255,20,147,.035);
         }
+
 
         .bot-avatar {
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
+            width: 48px;
+            height: 48px;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #ff1493, #ff5ab7);
-            font-size: 25px;
-            box-shadow: 0 0 25px rgba(255,20,147,0.25);
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #ff55b6
+                );
+
+            font-size: 23px;
+
+            box-shadow:
+                0 0 25px
+                rgba(255,20,147,.25);
         }
 
-        .chat-header h2 {
-            font-size: 21px;
+
+        .chat-title h2 {
+            font-size: 18px;
+
             margin-bottom: 4px;
         }
 
-        .chat-header p {
+
+        .chat-title p {
             color: #777;
-            font-size: 12px;
+
+            font-size: 11px;
         }
 
-        .online {
-            color: #ff62b6;
+
+        .online-dot {
+            color: #ff4fb0;
         }
 
-        .chat-input-row {
+
+        /* CHAT MESSAGES */
+
+        #chatMessages {
+            height: 430px;
+
+            overflow-y: auto;
+
+            padding:
+                25px 22px;
+
+            scroll-behavior: smooth;
+        }
+
+
+        #chatMessages::-webkit-scrollbar {
+            width: 5px;
+        }
+
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background:
+                rgba(255,20,147,.35);
+
+            border-radius: 10px;
+        }
+
+
+        .message-row {
             display: flex;
-            gap: 10px;
-            align-items: center;
+
+            margin-bottom: 22px;
         }
 
-        #chatMessage {
-            flex: 1;
-            min-width: 0;
-            height: 54px;
-            border-radius: 14px;
-            padding: 0 18px;
-            border: 1px solid rgba(255,255,255,0.09);
-            background: rgba(255,255,255,0.045);
-            color: white;
-            outline: none;
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+
+        .message-row.ai {
+            justify-content: flex-start;
+        }
+
+
+        .message-bubble {
+            max-width: 78%;
+
+            padding:
+                13px 16px;
+
+            border-radius: 17px;
+
             font-size: 14px;
-            transition: 0.3s;
-        }
 
-        #chatMessage::placeholder {
-            color: #676767;
-        }
-
-        #chatMessage:focus {
-            border-color: rgba(255,20,147,0.55);
-            box-shadow: 0 0 20px rgba(255,20,147,0.08);
-        }
-
-        .chat-send {
-            height: 54px;
-            padding: 0 23px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ff1493, #ff42ad);
-            color: white;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .chat-send:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(255,20,147,0.35);
-        }
-
-        #chatReply {
-            min-height: 60px;
-            margin-top: 18px;
-            padding: 18px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(0,0,0,0.22);
-            color: #d4d4d4;
             line-height: 1.65;
-            font-size: 14px;
+
             white-space: pre-wrap;
+
             word-break: break-word;
         }
 
-        /* ================= FOOTER ================= */
+
+        .user .message-bubble {
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #d90879
+                );
+
+            border-bottom-right-radius:
+                5px;
+
+            box-shadow:
+                0 5px 20px
+                rgba(255,20,147,.15);
+        }
+
+
+        .ai .message-bubble {
+            color: #dedede;
+
+            background:
+                #181818;
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            border-bottom-left-radius:
+                5px;
+        }
+
+
+        .message-label {
+            font-size: 10px;
+
+            color: #777;
+
+            margin-bottom: 5px;
+        }
+
+
+        .user .message-label {
+            text-align: right;
+        }
+
+
+        /* THINKING */
+
+        .thinking-bubble {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            padding:
+                13px 16px;
+
+            border-radius: 17px;
+
+            background:
+                #181818;
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            color: #999;
+
+            font-size: 13px;
+        }
+
+
+        .thinking-dots {
+            display: flex;
+
+            gap: 4px;
+        }
+
+
+        .thinking-dots span {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background:
+                var(--pink2);
+
+            animation:
+                thinking 1.1s infinite;
+        }
+
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay:
+                .15s;
+        }
+
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay:
+                .3s;
+        }
+
+
+        @keyframes thinking {
+
+            0%,60%,100% {
+                opacity: .25;
+                transform: translateY(0);
+            }
+
+            30% {
+                opacity: 1;
+                transform: translateY(-3px);
+            }
+
+        }
+
+
+        /* EMOTION NOTICE */
+
+        .emotion-context {
+            margin:
+                0 22px
+                15px;
+
+            padding:
+                13px 15px;
+
+            border:
+                1px solid
+                rgba(255,20,147,.2);
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,20,147,.045);
+
+            color: #aaa;
+
+            font-size: 12px;
+
+            display: none;
+        }
+
+
+        .emotion-context strong {
+            color: #ff69ba;
+        }
+
+
+        /* CHAT INPUT */
+
+        .chat-input-area {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding:
+                15px 18px;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,.07);
+
+            background:
+                rgba(0,0,0,.25);
+        }
+
+
+        #chatMessage {
+            flex: 1;
+
+            min-width: 0;
+
+            height: 50px;
+
+            padding:
+                0 17px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+
+            border-radius: 14px;
+
+            outline: none;
+
+            background:
+                rgba(255,255,255,.045);
+
+            color: white;
+
+            font-size: 14px;
+        }
+
+
+        #chatMessage::placeholder {
+            color: #666;
+        }
+
+
+        #chatMessage:focus {
+            border-color:
+                rgba(255,20,147,.5);
+
+            box-shadow:
+                0 0 20px
+                rgba(255,20,147,.07);
+        }
+
+
+        .chat-send-btn {
+            width: 50px;
+            height: 50px;
+
+            flex-shrink: 0;
+
+            border: none;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff1493,
+                    #ff42ad
+                );
+
+            color: white;
+
+            font-size: 19px;
+
+            cursor: pointer;
+
+            transition: .25s;
+        }
+
+
+        .chat-send-btn:hover {
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 0 25px
+                rgba(255,20,147,.4);
+        }
+
+
+        .chat-send-btn:disabled {
+            opacity: .55;
+
+            cursor:
+                not-allowed;
+
+            transform:
+                none;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
 
         footer {
-            border-top: 1px solid rgba(255,255,255,0.07);
-            padding: 30px 6%;
+            padding:
+                30px 6%;
+
             text-align: center;
+
             color: #666;
+
             font-size: 12px;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,.06);
         }
+
 
         footer strong {
             color: #ff5ab7;
         }
 
-        /* ================= RESPONSIVE ================= */
+
+        /* =========================
+           MOBILE
+        ========================= */
 
         @media (max-width: 850px) {
-
-            .nav-links {
-                gap: 14px;
-            }
 
             .nav-links a:not(.nav-ai) {
                 display: none;
             }
 
+
             .hero {
                 grid-template-columns: 1fr;
+
                 text-align: center;
-                padding-top: 55px;
+
+                padding-top: 50px;
             }
+
 
             .hero p {
                 margin-left: auto;
                 margin-right: auto;
             }
 
+
             .hero-buttons {
                 justify-content: center;
             }
 
+
             .hero-visual {
                 order: -1;
             }
+
 
             .visual-ring {
                 width: 290px;
                 height: 290px;
             }
 
+
             .brain {
                 width: 135px;
                 height: 135px;
+
                 font-size: 60px;
             }
+
         }
+
 
         @media (max-width: 600px) {
 
-            nav {
-                padding: 14px 5%;
+            .navbar {
+                padding:
+                    14px 5%;
             }
+
 
             .logo {
                 font-size: 19px;
             }
 
+
             .logo-icon {
                 width: 35px;
                 height: 35px;
-                border-radius: 11px;
             }
 
-            .nav-ai {
-                padding: 8px 11px;
-                font-size: 11px !important;
-            }
 
             .hero {
                 width: 91%;
-                padding: 45px 0 60px;
+
+                padding:
+                    45px 0
+                    60px;
             }
+
 
             .hero h1 {
                 font-size: 43px;
+
                 letter-spacing: -2px;
             }
+
 
             .hero p {
                 font-size: 14px;
             }
+
 
             .visual-ring {
                 width: 245px;
                 height: 245px;
             }
 
+
             .brain {
                 width: 115px;
                 height: 115px;
+
                 font-size: 50px;
             }
 
+
             .section {
                 width: 91%;
-                padding-bottom: 65px;
             }
 
-            .section-heading h2 {
-                font-size: 30px;
-            }
 
-            .emotion-card,
-            .chatbot-card {
+            .emotion-card {
                 padding: 23px;
+
                 border-radius: 22px;
             }
+
 
             .emotion-top {
                 flex-direction: column;
             }
 
-            .ai-status {
-                align-self: flex-start;
-            }
-
-            .emotion-title h3 {
-                font-size: 19px;
-            }
-
-            #recordBtn {
-                width: 105px;
-                height: 105px;
-                font-size: 30px;
-            }
 
             .chatbot-section {
                 width: 91%;
-                margin-bottom: 70px;
             }
 
-            .chat-input-row {
-                flex-direction: column;
+
+            .chatbot-card {
+                border-radius: 20px;
             }
 
-            #chatMessage,
-            .chat-send {
-                width: 100%;
+
+            #chatMessages {
+                height: 390px;
+
+                padding:
+                    20px 14px;
             }
 
-            .chat-send {
-                height: 50px;
+
+            .message-bubble {
+                max-width: 88%;
+
+                font-size: 13px;
             }
 
-            .hero-buttons .btn {
-                width: 100%;
+
+            .chat-input-area {
+                padding:
+                    12px;
             }
+
+
+            #chatMessage {
+                height: 47px;
+            }
+
+
+            .chat-send-btn {
+                width: 47px;
+                height: 47px;
+            }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
 
-    <nav>
+    <!-- =========================
+         NAVBAR
+    ========================= -->
+
+    <nav class="navbar">
+
         <div class="logo">
-            <div class="logo-icon">🧠</div>
-            <div>Emotion<span>AI</span></div>
+
+            <div class="logo-icon">
+                🧠
+            </div>
+
+            <div>
+                Emotion<span>AI</span>
+            </div>
+
         </div>
+
 
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="#about">About</a>
-            <a href="#features">Features</a>
-            <a href="/analysis" class="nav-ai">AI Analysis →</a>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="#about">
+                About
+            </a>
+
+            <a href="#features">
+                Features
+            </a>
+
+            <a href="/analysis"
+               class="nav-ai">
+                AI Analysis →
+            </a>
+
         </div>
+
     </nav>
 
 
-    <!-- ================= HERO ================= -->
+    <!-- =========================
+         HERO
+    ========================= -->
 
-    <section class="hero" id="about">
+    <section class="hero"
+             id="about">
 
-        <div class="hero-content">
+
+        <div class="hero-text">
+
 
             <div class="small-badge">
+
                 <span class="live-dot"></span>
+
                 AI POWERED SPEECH ANALYSIS
+
             </div>
+
 
             <h1>
+
                 Understand Human
-                <span>Emotions</span>
+
+                <span>
+                    Emotions
+                </span>
+
                 Through Speech
+
             </h1>
 
+
             <p>
-                EmotionAI uses artificial intelligence to analyse human
-                speech and identify emotional patterns such as happiness,
+
+                EmotionAI uses artificial intelligence
+                to analyse human speech and identify
+                emotional patterns such as happiness,
                 sadness, anger, fear, calmness and more.
+
             </p>
 
+
             <div class="hero-buttons">
-                <a href="/analysis" class="btn btn-primary">
+
+                <a href="/analysis"
+                   class="btn btn-primary">
+
                     Start Emotion Analysis →
+
                 </a>
 
-                <a href="#features" class="btn btn-outline">
+
+                <a href="#features"
+                   class="btn btn-outline">
+
                     Explore AI
+
                 </a>
+
             </div>
+
 
         </div>
 
 
         <div class="hero-visual">
 
+
             <div class="visual-ring">
 
+
                 <div class="orbit">
+
                     <div class="orbit-dot"></div>
+
                     <div class="orbit-dot"></div>
+
                     <div class="orbit-dot"></div>
+
                     <div class="orbit-dot"></div>
+
                 </div>
+
 
                 <div class="brain">
                     🧠
                 </div>
 
+
             </div>
 
+
         </div>
+
 
     </section>
 
 
-    <!-- ================= EMOTION ANALYSIS ================= -->
+    <!-- =========================
+         EMOTION ANALYSIS
+         EXISTING FEATURE
+    ========================= -->
 
-    <section class="section" id="features">
+    <section class="section"
+             id="features">
+
 
         <div class="section-heading">
 
@@ -972,10 +1742,15 @@
                 Speech Intelligence
             </div>
 
-            <h2>Analyse Your Voice</h2>
+
+            <h2>
+                Analyse Your Voice
+            </h2>
+
 
             <p>
-                Record your voice or upload an audio file to begin.
+                Record your voice or upload an
+                audio file to begin.
             </p>
 
         </div>
@@ -983,61 +1758,89 @@
 
         <div class="emotion-card">
 
+
             <div class="emotion-top">
 
+
                 <div class="emotion-title">
+
 
                     <div class="mic-icon">
                         🎙️
                     </div>
 
+
                     <div>
-                        <h3>Speech Emotion AI</h3>
+
+                        <h3>
+                            Speech Emotion AI
+                        </h3>
+
 
                         <p>
-                            Let AI understand the emotional pattern
-                            inside your voice.
+                            Let AI understand the
+                            emotional pattern inside
+                            your voice.
                         </p>
+
                     </div>
 
+
                 </div>
+
 
                 <div class="ai-status">
                     ● AI READY
                 </div>
+
 
             </div>
 
 
             <div class="record-area">
 
-                <button id="recordBtn" type="button">
+
+                <button
+                    id="recordBtn"
+                    type="button">
+
                     🎙️
+
                 </button>
+
 
             </div>
 
 
             <div class="or-text">
+
                 OR UPLOAD AUDIO
+
             </div>
 
 
             <div class="upload-area">
 
-                <label for="audioFile" class="upload-label">
+
+                <label
+                    for="audioFile"
+                    class="upload-label">
+
                     📁 Choose Audio File
+
                 </label>
+
 
                 <input
                     type="file"
                     id="audioFile"
-                    accept="audio/*"
-                >
+                    accept="audio/*">
+
 
                 <span id="fileName">
                     No audio file selected
                 </span>
+
 
             </div>
 
@@ -1048,365 +1851,930 @@
             </audio>
 
 
-            <button id="analyzeBtn" type="button">
+            <button
+                id="analyzeBtn"
+                type="button">
+
                 ✨ ANALYZE EMOTION
+
             </button>
 
 
             <div id="status"></div>
 
+
         </div>
+
 
     </section>
 
 
-    <!-- ================= CHATBOT ================= -->
+    <!-- =====================================================
+         CHATBOT
+    ===================================================== -->
 
     <section class="chatbot-section">
 
+
         <div class="chatbot-card">
 
+
+            <!-- HEADER -->
+
             <div class="chat-header">
+
 
                 <div class="bot-avatar">
                     🤖
                 </div>
 
-                <div>
-                    <h2>EmotionAI Assistant</h2>
+
+                <div class="chat-title">
+
+                    <h2>
+                        EmotionAI
+                    </h2>
+
 
                     <p>
-                        <span class="online">● Online</span>
-                        &nbsp; Ask anything about your emotion analysis.
+
+                        <span class="online-dot">
+                            ●
+                        </span>
+
+                        Online · AI Assistant
+
                     </p>
+
                 </div>
+
 
             </div>
 
 
-            <div class="chat-input-row">
+            <!-- EMOTION CONTEXT -->
+
+            <div
+                id="emotionContext"
+                class="emotion-context">
+
+                🎭 Recent speech emotion:
+                <strong id="emotionValue">
+                    Not detected
+                </strong>
+
+            </div>
+
+
+            <!-- CHAT MESSAGES -->
+
+            <div id="chatMessages">
+
+
+                <div class="message-row ai">
+
+
+                    <div>
+
+                        <div class="message-label">
+                            EmotionAI
+                        </div>
+
+
+                        <div class="message-bubble">
+
+                            Hi! 👋 I'm EmotionAI.
+                            Ask me anything about
+                            emotions, your voice
+                            analysis, or any question.
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- INPUT -->
+
+            <div class="chat-input-area">
+
 
                 <input
                     type="text"
                     id="chatMessage"
-                    placeholder="Ask EmotionAI anything..."
-                    autocomplete="off"
-                >
+                    placeholder="Message EmotionAI..."
+                    autocomplete="off">
+
 
                 <button
-                    class="chat-send"
+                    id="chatSendBtn"
+                    class="chat-send-btn"
                     type="button"
                     onclick="sendMessage()">
-                    SEND
+
+                    ➤
+
                 </button>
 
+
             </div>
 
-
-            <div id="chatReply">
-                AI assistant is ready...
-            </div>
 
         </div>
+
 
     </section>
 
 
-    <!-- ================= FOOTER ================= -->
+    <!-- FOOTER -->
 
     <footer>
-        © 2026 <strong>EmotionAI</strong> — AI-Powered Human Emotion Understanding Through Speech
+
+        © 2026
+        <strong>EmotionAI</strong>
+        —
+        AI-Powered Human Emotion Understanding
+        Through Speech
+
     </footer>
 
 
-    <!-- ================= JAVASCRIPT ================= -->
+    <!-- =====================================================
+         JAVASCRIPT
+    ===================================================== -->
 
     <script>
 
-        /* ================= CHATBOT ================= */
 
-        async function sendMessage() {
+        /* =====================================================
+           CHATBOT
+        ===================================================== */
 
-            const input = document.getElementById("chatMessage");
-            const reply = document.getElementById("chatReply");
 
-            const message = input.value.trim();
+        const chatMessages =
+            document.getElementById(
+                "chatMessages"
+            );
 
-            if (!message) {
-                return;
-            }
 
-            reply.innerText = "Thinking...";
+        const chatInput =
+            document.getElementById(
+                "chatMessage"
+            );
 
-            const formData = new FormData();
 
-            formData.append("message", message);
+        const chatSendBtn =
+            document.getElementById(
+                "chatSendBtn"
+            );
 
-            try {
 
-                const response = await fetch("/chatbot", {
-                    method: "POST",
-                    body: formData
-                });
+        const emotionContext =
+            document.getElementById(
+                "emotionContext"
+            );
 
-                const text = await response.text();
 
-                reply.innerText = text;
+        const emotionValue =
+            document.getElementById(
+                "emotionValue"
+            );
 
-            } catch (error) {
 
-                reply.innerText =
-                    "Sorry, something went wrong. Please try again.";
+        let thinkingElement = null;
 
-            }
+
+        /*
+         * Add a chat message
+         */
+
+        function addMessage(
+            message,
+            type
+        ) {
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "message-row " +
+                type;
+
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "message-label";
+
+
+            label.innerText =
+                type === "user"
+                    ? "You"
+                    : "EmotionAI";
+
+
+            const bubble =
+                document.createElement(
+                    "div"
+                );
+
+
+            bubble.className =
+                "message-bubble";
+
+
+            bubble.innerText =
+                message;
+
+
+            wrapper.appendChild(label);
+
+            wrapper.appendChild(bubble);
+
+            row.appendChild(wrapper);
+
+            chatMessages.appendChild(row);
+
+
+            scrollChat();
 
         }
 
 
-        /* ENTER KEY FOR CHAT */
+        /*
+         * Scroll to latest message
+         */
 
-        document
-            .getElementById("chatMessage")
-            .addEventListener("keydown", function(event) {
+        function scrollChat() {
 
-                if (event.key === "Enter") {
-                    sendMessage();
-                }
+            chatMessages.scrollTop =
+                chatMessages.scrollHeight;
 
-            });
-
-
-        /* ================= RECORDING ================= */
-
-        let mediaRecorder;
-        let audioChunks = [];
-        let recordedBlob = null;
+        }
 
 
-        const recordBtn =
-            document.getElementById("recordBtn");
+        /*
+         * Thinking indicator
+         */
 
-        const status =
-            document.getElementById("status");
-
-        const audioPreview =
-            document.getElementById("audioPreview");
+        function showThinking() {
 
 
-        recordBtn.addEventListener("click", async function() {
+            const row =
+                document.createElement(
+                    "div"
+                );
 
-            if (mediaRecorder && mediaRecorder.state === "recording") {
 
-                mediaRecorder.stop();
+            row.className =
+                "message-row ai";
 
-                recordBtn.classList.remove("recording");
 
-                recordBtn.innerText = "🎙️";
+            row.id =
+                "thinkingMessage";
 
-                status.innerText = "Recording stopped. Processing...";
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "message-label";
+
+
+            label.innerText =
+                "EmotionAI";
+
+
+            const bubble =
+                document.createElement(
+                    "div"
+                );
+
+
+            bubble.className =
+                "thinking-bubble";
+
+
+            bubble.innerHTML = `
+
+                <span>
+                    Thinking
+                </span>
+
+                <span class="thinking-dots">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </span>
+
+            `;
+
+
+            wrapper.appendChild(label);
+
+            wrapper.appendChild(bubble);
+
+            row.appendChild(wrapper);
+
+            chatMessages.appendChild(row);
+
+
+            thinkingElement = row;
+
+
+            scrollChat();
+
+        }
+
+
+        /*
+         * Remove thinking
+         */
+
+        function removeThinking() {
+
+
+            const element =
+                document.getElementById(
+                    "thinkingMessage"
+                );
+
+
+            if (element) {
+
+                element.remove();
+
+            }
+
+
+            thinkingElement =
+                null;
+
+        }
+
+
+        /*
+         * Send message
+         */
+
+        async function sendMessage() {
+
+
+            const message =
+                chatInput.value.trim();
+
+
+            if (!message) {
 
                 return;
-            }
-
-
-            try {
-
-                const stream =
-                    await navigator.mediaDevices.getUserMedia({
-                        audio: true
-                    });
-
-
-                audioChunks = [];
-
-                mediaRecorder =
-                    new MediaRecorder(stream);
-
-
-                mediaRecorder.ondataavailable = function(event) {
-
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-
-                };
-
-
-                mediaRecorder.onstop = function() {
-
-                    recordedBlob =
-                        new Blob(audioChunks, {
-                            type: "audio/webm"
-                        });
-
-
-                    const audioURL =
-                        URL.createObjectURL(recordedBlob);
-
-
-                    audioPreview.src = audioURL;
-
-                    audioPreview.style.display = "block";
-
-                    status.innerText =
-                        "Recording ready. Click Analyze Emotion.";
-
-                    stream.getTracks().forEach(
-                        track => track.stop()
-                    );
-
-                };
-
-
-                mediaRecorder.start();
-
-                recordBtn.classList.add("recording");
-
-                recordBtn.innerText = "⏹️";
-
-                status.innerText =
-                    "Recording... Speak now.";
-
-            } catch (error) {
-
-                status.innerText =
-                    "Microphone permission was denied or unavailable.";
-
-            }
-
-        });
-
-
-        /* ================= FILE UPLOAD ================= */
-
-        const audioFile =
-            document.getElementById("audioFile");
-
-
-        audioFile.addEventListener("change", function() {
-
-            const file = this.files[0];
-
-            if (!file) {
-                return;
-            }
-
-            document.getElementById("fileName").innerText =
-                file.name;
-
-            recordedBlob = null;
-
-            const fileURL =
-                URL.createObjectURL(file);
-
-            audioPreview.src = fileURL;
-
-            audioPreview.style.display = "block";
-
-            status.innerText =
-                "Audio selected. Click Analyze Emotion.";
-
-        });
-
-
-        /* ================= ANALYZE ================= */
-
-        const analyzeBtn =
-            document.getElementById("analyzeBtn");
-
-
-        analyzeBtn.addEventListener("click", async function() {
-
-            let audioData = null;
-
-
-            if (recordedBlob) {
-
-                audioData = recordedBlob;
-
-            } else if (audioFile.files.length > 0) {
-
-                audioData = audioFile.files[0];
 
             }
 
 
-            if (!audioData) {
+            /*
+             * User message appears
+             * immediately
+             */
 
-                status.innerText =
-                    "Please record or upload an audio file first.";
-
-                return;
-            }
-
-
-            status.innerText =
-                "AI is analysing your voice...";
+            addMessage(
+                message,
+                "user"
+            );
 
 
-            analyzeBtn.disabled = true;
+            /*
+             * Clear input
+             */
 
-            analyzeBtn.innerText =
-                "⏳ ANALYSING...";
+            chatInput.value = "";
+
+
+            /*
+             * Disable send
+             */
+
+            chatSendBtn.disabled =
+                true;
+
+
+            /*
+             * Show thinking
+             */
+
+            showThinking();
 
 
             const formData =
                 new FormData();
 
 
-            if (recordedBlob) {
-
-                formData.append(
-                    "audio",
-                    recordedBlob,
-                    "recording.webm"
-                );
-
-            } else {
-
-                formData.append(
-                    "audio",
-                    audioFile.files[0]
-                );
-
-            }
+            formData.append(
+                "message",
+                message
+            );
 
 
             try {
 
+
                 const response =
-                    await fetch("/upload", {
-                        method: "POST",
-                        body: formData
-                    });
+                    await fetch(
+                        "/chatbot",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
 
 
-                const result =
+                const answer =
                     await response.text();
 
 
-                document.open();
+                /*
+                 * Remove thinking
+                 * immediately when answer arrives
+                 */
 
-                document.write(result);
-
-                document.close();
+                removeThinking();
 
 
-            } catch (error) {
+                /*
+                 * Show answer
+                 */
 
-                status.innerText =
-                    "Something went wrong. Please try again.";
+                addMessage(
+                    answer,
+                    "ai"
+                );
 
-                analyzeBtn.disabled = false;
-
-                analyzeBtn.innerText =
-                    "✨ ANALYZE EMOTION";
 
             }
 
-        });
+            catch (error) {
+
+
+                console.error(
+                    error
+                );
+
+
+                removeThinking();
+
+
+                addMessage(
+                    "Sorry, I couldn't connect to the AI service right now. Please try again.",
+                    "ai"
+                );
+
+            }
+
+
+            finally {
+
+                chatSendBtn.disabled =
+                    false;
+
+                chatInput.focus();
+
+            }
+
+        }
+
+
+        /*
+         * Enter key
+         */
+
+        chatInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter"
+                    &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           EXISTING EMOTION RECORDING
+        ===================================================== */
+
+
+        let mediaRecorder;
+
+        let audioChunks = [];
+
+        let recordedBlob = null;
+
+
+        const recordBtn =
+            document.getElementById(
+                "recordBtn"
+            );
+
+
+        const audioFile =
+            document.getElementById(
+                "audioFile"
+            );
+
+
+        const audioPreview =
+            document.getElementById(
+                "audioPreview"
+            );
+
+
+        const analyzeBtn =
+            document.getElementById(
+                "analyzeBtn"
+            );
+
+
+        const status =
+            document.getElementById(
+                "status"
+            );
+
+
+        /*
+         * Recording
+         */
+
+        recordBtn.addEventListener(
+            "click",
+            async function() {
+
+
+                if (
+                    mediaRecorder &&
+                    mediaRecorder.state ===
+                    "recording"
+                ) {
+
+
+                    mediaRecorder.stop();
+
+
+                    recordBtn.classList.remove(
+                        "recording"
+                    );
+
+
+                    recordBtn.innerText =
+                        "🎙️";
+
+
+                    status.innerText =
+                        "Recording stopped. Processing...";
+
+
+                    return;
+
+                }
+
+
+                try {
+
+
+                    const stream =
+                        await navigator
+                        .mediaDevices
+                        .getUserMedia({
+                            audio: true
+                        });
+
+
+                    audioChunks = [];
+
+
+                    mediaRecorder =
+                        new MediaRecorder(
+                            stream
+                        );
+
+
+                    mediaRecorder.ondataavailable =
+                        function(event) {
+
+
+                            if (
+                                event.data.size > 0
+                            ) {
+
+                                audioChunks.push(
+                                    event.data
+                                );
+
+                            }
+
+                        };
+
+
+                    mediaRecorder.onstop =
+                        function() {
+
+
+                            recordedBlob =
+                                new Blob(
+                                    audioChunks,
+                                    {
+                                        type:
+                                            "audio/webm"
+                                    }
+                                );
+
+
+                            const audioURL =
+                                URL.createObjectURL(
+                                    recordedBlob
+                                );
+
+
+                            audioPreview.src =
+                                audioURL;
+
+
+                            audioPreview.style.display =
+                                "block";
+
+
+                            status.innerText =
+                                "Recording ready. Click Analyze Emotion.";
+
+                        };
+
+
+                    mediaRecorder.start();
+
+
+                    recordBtn.classList.add(
+                        "recording"
+                    );
+
+
+                    recordBtn.innerText =
+                        "⏹️";
+
+
+                    status.innerText =
+                        "Recording... Speak now.";
+
+
+                }
+
+
+                catch (error) {
+
+
+                    console.error(
+                        error
+                    );
+
+
+                    status.innerText =
+                        "Microphone permission was denied or unavailable.";
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Upload
+         */
+
+        audioFile.addEventListener(
+            "change",
+            function() {
+
+
+                const file =
+                    this.files[0];
+
+
+                if (!file) {
+
+                    return;
+
+                }
+
+
+                recordedBlob =
+                    null;
+
+
+                document.getElementById(
+                    "fileName"
+                ).innerText =
+                    file.name;
+
+
+                const fileURL =
+                    URL.createObjectURL(
+                        file
+                    );
+
+
+                audioPreview.src =
+                    fileURL;
+
+
+                audioPreview.style.display =
+                    "block";
+
+
+                status.innerText =
+                    "Audio selected. Click Analyze Emotion.";
+
+            }
+        );
+
+
+        /*
+         * Analyze
+         *
+         * IMPORTANT:
+         * Existing /upload route is preserved.
+         */
+
+        analyzeBtn.addEventListener(
+            "click",
+            async function() {
+
+
+                let audioData =
+                    null;
+
+
+                if (recordedBlob) {
+
+                    audioData =
+                        recordedBlob;
+
+                }
+
+                else if (
+                    audioFile.files.length > 0
+                ) {
+
+                    audioData =
+                        audioFile.files[0];
+
+                }
+
+
+                if (!audioData) {
+
+                    status.innerText =
+                        "Please record or upload an audio file first.";
+
+                    return;
+
+                }
+
+
+                status.innerText =
+                    "AI is analysing your voice...";
+
+
+                analyzeBtn.disabled =
+                    true;
+
+
+                analyzeBtn.innerText =
+                    "⏳ ANALYSING...";
+
+
+                const formData =
+                    new FormData();
+
+
+                if (recordedBlob) {
+
+
+                    formData.append(
+                        "audio",
+                        recordedBlob,
+                        "recording.webm"
+                    );
+
+                }
+
+                else {
+
+
+                    formData.append(
+                        "audio",
+                        audioFile.files[0]
+                    );
+
+                }
+
+
+                try {
+
+
+                    const response =
+                        await fetch(
+                            "/upload",
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    const result =
+                        await response.text();
+
+
+                    /*
+                     * Existing behaviour:
+                     * /upload result page opens.
+                     */
+
+                    document.open();
+
+                    document.write(
+                        result
+                    );
+
+                    document.close();
+
+
+                }
+
+                catch (error) {
+
+
+                    console.error(
+                        error
+                    );
+
+
+                    status.innerText =
+                        "Something went wrong. Please try again.";
+
+
+                    analyzeBtn.disabled =
+                        false;
+
+
+                    analyzeBtn.innerText =
+                        "✨ ANALYZE EMOTION";
+
+                }
+
+            }
+        );
+
 
     </script>
 
+
 </body>
+
 </html>
