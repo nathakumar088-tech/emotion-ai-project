@@ -151,10 +151,10 @@ emotion_message = emotion_motivation.get(
     ""
 )
 
-if not message:
-    return "Please enter a message."
+    if not message:
+        return "Please enter a message."
 
-message_lower = message.lower()
+    message_lower = message.lower()
 
     # =====================================================
     # WEATHER HANDLER
@@ -166,7 +166,6 @@ message_lower = message.lower()
         "rain",
         "forecast"
     ]
-
     if any(word in message_lower for word in weather_words):
 
         try:
