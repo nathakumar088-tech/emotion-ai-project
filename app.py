@@ -956,6 +956,7 @@ def upload():
     return f"""
 <!DOCTYPE html>
 
+    result_html = f"""
 <html>
 
 <head>
