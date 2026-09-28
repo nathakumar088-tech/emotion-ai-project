@@ -357,11 +357,20 @@ Never claim to be human.
 Emotion prediction is not a medical diagnosis.
 """
 
-    prompt = f"""
+prompt = f"""
 {system_instruction}
+
+Detected emotion:
+{latest_emotion}
+
+Emotion-based supportive message:
+{emotion_message}
 
 User message:
 {message}
+
+Use the detected emotion only when it is relevant to the user's message.
+Do not mention the emotion detection system unless the user asks about it.
 
 Answer the user's intended question directly.
 """
