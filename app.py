@@ -133,23 +133,24 @@ def analysis():
 def chatbot():
 
     message = request.form.get("message", "").strip()
-    
-    latest_emotion = session.get("latest_emotion", "")
-    emotion_motivation = {
-    "Happy": "You seem happy! Keep enjoying the positive moments and continue doing what makes you feel good. 😊",
-    "Calm": "You seem calm. That's a good state to be in. Keep taking things one step at a time. 🌿",
-    "Sad": "You seem a little sad. It's okay to have difficult moments. Take things slowly and talk to someone you trust if you need support. 💙",
-    "Angry": "You seem frustrated or angry. Take a short pause and give yourself some space before reacting. 🌸",
-   "Fear": "You seem a little worried. Take things one step at a time and focus on what you can control. 🤍",
-    "Disgust": "You seem uncomfortable with something. Take a moment to understand what is bothering you. 🌱",
-    "Surprised": "You seem surprised! Something unexpected caught your attention. 😮",
-    "Neutral": "You seem neutral right now. That's completely okay. Tell me what's on your mind. 🙂"
-}
 
-emotion_message = emotion_motivation.get(
-    latest_emotion,
-    ""
-)
+    latest_emotion = session.get("latest_emotion", "")
+
+    emotion_motivation = {
+        "Happy": "You seem happy! Keep enjoying the positive moments and continue doing what makes you feel good. 😊",
+        "Calm": "You seem calm. That's a good state to be in. Keep taking things one step at a time. 🌿",
+        "Sad": "You seem a little sad. It's okay to have difficult moments. Take things slowly and talk to someone you trust if you need support. 💙",
+        "Angry": "You seem frustrated or angry. Take a short pause and give yourself some space before reacting. 🌸",
+        "Fear": "You seem a little worried. Take things one step at a time and focus on what you can control. 🤍",
+        "Disgust": "You seem uncomfortable with something. Take a moment to understand what is bothering you. 🌱",
+        "Surprised": "You seem surprised! Something unexpected caught your attention. 😮",
+        "Neutral": "You seem neutral right now. That's completely okay. Tell me what's on your mind. 🙂"
+    }
+
+    emotion_message = emotion_motivation.get(
+        latest_emotion,
+        ""
+    )
 
     if not message:
         return "Please enter a message."
