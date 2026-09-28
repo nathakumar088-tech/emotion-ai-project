@@ -6,6 +6,9 @@ import librosa
 import onnxruntime as ort
 from huggingface_hub import hf_hub_download
 from google import genai
+import urllib.request
+import urllib.parse
+import xml.etree.ElementTree as ET
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "emotion-ai-secret-key")
@@ -126,7 +129,6 @@ def analysis():
 # =========================================================
 # FAST AI CHATBOT + GOOGLE SEARCH
 # =========================================================
-
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
 
@@ -135,209 +137,255 @@ def chatbot():
     if not message:
         return "Please enter a message."
 
-    if gemini_client is None:
-        return "AI chatbot is not configured yet."
+    message_lower = message.lower()
 
     # =====================================================
-    # EMOTIONAI SYSTEM INSTRUCTION
+    # WEATHER HANDLER
     # =====================================================
+
+    weather_words = [
+        "weather",
+        "temperature",
+        "rain",
+        "forecast"
+    ]
+
+    if any(word in message_lower for word in weather_words):
+
+        try:
+
+            # Detect city
+            city = "Chennai"
+
+            known_cities = [
+                "chennai",
+                "bengaluru",
+                "bangalore",
+                "mumbai",
+                "delhi",
+                "hyderabad",
+                "kolkata",
+                "pune",
+                "coimbatore",
+                "madurai",
+                "tiruchirappalli",
+                "trichy"
+            ]
+
+            for c in known_cities:
+                if c in message_lower:
+                    city = c
+                    break
+
+            # ---------------------------------------------
+            # Geocoding
+            # ---------------------------------------------
+
+            geo_url = (
+                "https://geocoding-api.open-meteo.com/v1/search?"
+                + urllib.parse.urlencode({
+                    "name": city,
+                    "count": 1,
+                    "language": "en",
+                    "format": "json"
+                })
+            )
+
+            with urllib.request.urlopen(
+                geo_url,
+                timeout=10
+            ) as response:
+
+                geo_data = response.read().decode("utf-8")
+
+            geo_json = __import__("json").loads(geo_data)
+
+            if not geo_json.get("results"):
+                return "I couldn't find that location."
+
+            location = geo_json["results"][0]
+
+            latitude = location["latitude"]
+            longitude = location["longitude"]
+
+            # ---------------------------------------------
+            # Weather API
+            # ---------------------------------------------
+
+            weather_url = (
+                "https://api.open-meteo.com/v1/forecast?"
+                + urllib.parse.urlencode({
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                    "timezone": "auto"
+                })
+            )
+
+            with urllib.request.urlopen(
+                weather_url,
+                timeout=10
+            ) as response:
+
+                weather_data = response.read().decode("utf-8")
+
+            weather = __import__("json").loads(weather_data)
+
+            current = weather.get("current", {})
+
+            temperature = current.get(
+                "temperature_2m",
+                "N/A"
+            )
+
+            humidity = current.get(
+                "relative_humidity_2m",
+                "N/A"
+            )
+
+            wind = current.get(
+                "wind_speed_10m",
+                "N/A"
+            )
+
+            weather_code = current.get(
+                "weather_code",
+                -1
+            )
+
+            weather_description = {
+                0: "Clear sky",
+                1: "Mainly clear",
+                2: "Partly cloudy",
+                3: "Overcast",
+                45: "Foggy",
+                48: "Foggy",
+                51: "Light drizzle",
+                53: "Drizzle",
+                55: "Heavy drizzle",
+                61: "Light rain",
+                63: "Rain",
+                65: "Heavy rain",
+                71: "Light snow",
+                73: "Snow",
+                75: "Heavy snow",
+                80: "Rain showers",
+                81: "Rain showers",
+                82: "Heavy rain showers",
+                95: "Thunderstorm",
+                96: "Thunderstorm with hail",
+                99: "Thunderstorm with hail"
+            }.get(
+                weather_code,
+                "Unknown conditions"
+            )
+
+            return (
+                f"🌦️ Weather in {city.title()} right now:\n\n"
+                f"Condition: {weather_description}\n"
+                f"Temperature: {temperature}°C\n"
+                f"Humidity: {humidity}%\n"
+                f"Wind: {wind} km/h"
+            )
+
+        except Exception as e:
+
+            print("WEATHER ERROR:")
+            print(str(e))
+
+            return (
+                "Sorry, I couldn't get the current weather "
+                "right now. Please try again."
+            )
+
+    # =====================================================
+    # NORMAL AI CHAT
+    # =====================================================
+
+    if gemini_client is None:
+
+        return (
+            "AI chatbot is not configured yet."
+        )
 
     system_instruction = """
-You are EmotionAI, a fast, friendly and intelligent AI assistant.
+You are EmotionAI, a fast, friendly and helpful AI assistant.
 
-LANGUAGE UNDERSTANDING:
-- Understand normal English.
-- Understand Tanglish.
-- Understand informal English.
-- Understand abbreviations.
-- Understand spelling mistakes and typing mistakes.
-- Infer the user's intended meaning.
-- Never criticize spelling mistakes.
-- If the user writes Tamil using English letters, understand it.
+Understand:
+- English
+- Tanglish
+- spelling mistakes
+- typing mistakes
+- abbreviations
+- informal English
+- Tamil written using English letters
 
-ANSWER STYLE:
-- Answer the user's actual question directly.
-- Keep simple questions concise.
-- Give useful explanations when the question needs explanation.
-- Do not unnecessarily repeat the user's question.
-- Do not say that you are unable to understand because of spelling mistakes.
-- Never claim to be human.
+Infer what the user actually means.
 
-CURRENT INFORMATION:
-For questions containing or meaning:
-- latest
-- today
-- current
-- now
-- recent
-- news
-- weather
-- live
-- current price
-- current score
-- today's events
-- 2026 information
+Never criticize spelling mistakes.
 
-use Google Search.
+Answer directly and clearly.
 
-IMPORTANT:
-When Google Search is available, use the search results
-instead of relying only on old knowledge.
+Keep simple questions concise.
 
-WEATHER:
-If the user asks something like:
-- Chennai weather today
-- weather in Chennai
-- Chennai temperature now
-- will it rain in Chennai today
+Remember previous conversation context when available.
 
-use Google Search and provide the current/relevant weather information.
+For normal/general questions, answer directly.
 
-NEWS:
-If the user asks:
-- latest news
-- today's news
-- latest technology news
-- latest India news
-- latest Chennai news
+For emotions or personal difficulties, respond with empathy
+and safe supportive guidance.
 
-use Google Search and summarize the relevant current results.
+Never claim to be human.
 
-CONVERSATION:
-Remember the previous conversation when previous context is available.
-If the user says:
-- explain more
-- why
-- what about this
-- tell me more
-- continue
-understand that it refers to the previous conversation.
-
-EMOTION:
-If the user talks about emotions or personal difficulties,
-respond with empathy and safe supportive guidance.
-
-PROJECT:
-If the user asks about EmotionAI, speech emotion recognition,
-AI, Flask, Python, or the project, explain clearly and simply.
-
-IMPORTANT:
 Emotion prediction is not a medical diagnosis.
 """
-
-    # =====================================================
-    # USER PROMPT
-    # =====================================================
 
     prompt = f"""
 {system_instruction}
 
-User's message:
+User message:
 {message}
 
-Understand the user's intended meaning even if there are
-spelling mistakes or Tanglish.
-
-Answer directly.
+Answer the user's intended question directly.
 """
 
     try:
 
-        # =================================================
-        # DETECT CURRENT INFORMATION QUESTIONS
-        # =================================================
-
-        message_lower = message.lower()
-
-        search_words = [
-            "latest",
-            "today",
-            "current",
-            "now",
-            "recent",
-            "news",
-            "weather",
-            "temperature",
-            "rain",
-            "forecast",
-            "live",
-            "price",
-            "score",
-            "scores",
-            "event",
-            "events",
-            "2026"
-        ]
-
-        use_search = any(
-            word in message_lower
-            for word in search_words
+        previous_id = session.get(
+            "previous_interaction_id"
         )
-
-        # =================================================
-        # PREVIOUS CONVERSATION
-        # =================================================
-
-        previous_id = session.get("previous_interaction_id")
-
-        # =================================================
-        # GEMINI REQUEST
-        # =================================================
 
         interaction_args = {
             "model": "gemini-3.8-flash",
             "input": prompt
         }
 
-        # =================================================
-        # GOOGLE SEARCH FOR CURRENT INFORMATION
-        # =================================================
-
-        if use_search:
-
-            interaction_args["tools"] = [
-                {
-                    "type": "google_search"
-                }
-            ]
-
-        # =================================================
-        # CONTINUE CONVERSATION
-        # =================================================
-
         if previous_id:
 
-            interaction_args["previous_interaction_id"] = previous_id
+            interaction_args[
+                "previous_interaction_id"
+            ] = previous_id
 
-        # =================================================
-        # SEND REQUEST
-        # =================================================
-
-        interaction = gemini_client.interactions.create(
-            **interaction_args
+        interaction = (
+            gemini_client.interactions.create(
+                **interaction_args
+            )
         )
 
-        # =================================================
-        # SAVE CONVERSATION CONTEXT
-        # =================================================
-
-        session["previous_interaction_id"] = interaction.id
-
-        # =================================================
-        # GET ANSWER
-        # =================================================
+        session[
+            "previous_interaction_id"
+        ] = interaction.id
 
         answer = interaction.output_text
 
         if not answer:
 
-            return "I couldn't generate a response. Please try again."
+            return (
+                "I couldn't generate a response. "
+                "Please try again."
+            )
 
         return answer
-
-    # =====================================================
-    # ERROR HANDLING
-    # =====================================================
 
     except Exception as e:
 
@@ -346,7 +394,6 @@ Answer directly.
 
         error_text = str(e).lower()
 
-        # Gemini quota exceeded
         if (
             "429" in error_text
             or "quota" in error_text
@@ -354,26 +401,13 @@ Answer directly.
         ):
 
             return (
-                "AI service quota is temporarily exceeded. "
-                "Please try again later."
-            )
-
-        # API / connection error
-        if (
-            "timeout" in error_text
-            or "connection" in error_text
-            or "network" in error_text
-        ):
-
-            return (
-                "The AI service is taking too long to respond. "
-                "Please try again."
+                "AI chat quota is temporarily exceeded. "
+                "Weather questions are available separately."
             )
 
         return (
             "Sorry, I couldn't process your message right now."
         )
-
 # =========================================================
 # CONVERT AUDIO TO WAV
 # =========================================================
