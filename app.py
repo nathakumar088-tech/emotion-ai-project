@@ -917,7 +917,7 @@ def upload():
                 </span>
 
                 <span class="emotion-score">
-                    {score:.2f}%
+                    {score}%
                 </span>
 
             </div>
