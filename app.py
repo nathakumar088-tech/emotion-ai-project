@@ -386,24 +386,18 @@ Never claim to be human.
 
 Emotion prediction is not a medical diagnosis.
 """
-
-    prompt = f"""
-{system_instruction}
-
-Detected emotion:
-{latest_emotion}
-
-Emotion-based supportive message:
-{emotion_message}
-
-User message:
-{message}
-
-Use the detected emotion only when it is relevant to the user's message.
-Do not mention the emotion detection system unless the user asks about it.
-
-Answer the user's intended question directly.
-"""
+    prompt = (
+        system_instruction
+        + "\n\nDetected emotion:\n"
+        + latest_emotion
+        + "\n\nEmotion-based supportive message:\n"
+        + emotion_message
+        + "\n\nUser message:\n"
+        + message
+        + "\n\nUse the detected emotion only when it is relevant to the user's message."
+        + "\nDo not mention the emotion detection system unless the user asks about it."
+        + "\n\nAnswer the user's intended question directly."
+    )
 
     try:
 
