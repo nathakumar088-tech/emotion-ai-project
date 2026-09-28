@@ -387,7 +387,7 @@ Never claim to be human.
 Emotion prediction is not a medical diagnosis.
 """
 
-prompt = f"""
+    prompt = f"""
 {system_instruction}
 
 Detected emotion:
@@ -408,6 +408,13 @@ Answer the user's intended question directly.
     try:
 
         previous_id = session.get(
+            "previous_interaction_id"
+        )
+
+        interaction_args = {
+            "model": "gemini-3.8-flash",
+            "input": prompt
+        }
 
         if previous_id:
 
@@ -433,7 +440,6 @@ Answer the user's intended question directly.
                 "I couldn't generate a response. "
                 "Please try again."
             )
-
         return answer
 
     except Exception as e:
