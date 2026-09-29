@@ -399,7 +399,7 @@ prompt = (
         + "\n\nAnswer the user's intended question directly."
     )
 
-    try:
+try:
 
         previous_id = session.get(
             "previous_interaction_id"
