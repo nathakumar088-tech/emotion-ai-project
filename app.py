@@ -356,37 +356,7 @@ Never claim to be human.
 
 Emotion prediction is not a medical diagnosis.
 """
-system_instruction = """
-
-Understand:
-- English
-- Tanglish
-- spelling mistakes
-- typing mistakes
-- abbreviations
-- informal English
-- Tamil written using English letters
-
-Infer what the user actually means.
-
-Never criticize spelling mistakes.
-
-Answer directly and clearly.
-
-Keep simple questions concise.
-
-Remember previous conversation context when available.
-
-For normal/general questions, answer directly.
-
-For emotions or personal difficulties, respond with empathy
-and safe supportive guidance.
-
-Never claim to be human.
-
-Emotion prediction is not a medical diagnosis.
-"""
-prompt = (
+    prompt = (
         system_instruction
         + "\n\nDetected emotion:\n"
         + latest_emotion
@@ -399,8 +369,7 @@ prompt = (
         + "\n\nAnswer the user's intended question directly."
     )
 
-try:
-
+    try:
         previous_id = session.get(
             "previous_interaction_id"
         )
@@ -411,7 +380,6 @@ try:
         }
 
         if previous_id:
-
             interaction_args[
                 "previous_interaction_id"
             ] = previous_id
@@ -429,15 +397,14 @@ try:
         answer = interaction.output_text
 
         if not answer:
-
             return (
                 "I couldn't generate a response. "
                 "Please try again."
             )
+
         return answer
 
-except Exception as e:
-
+    except Exception as e:
         print("CHATBOT ERROR:")
         print(str(e))
 
@@ -448,7 +415,6 @@ except Exception as e:
             or "quota" in error_text
             or "too_many_requests" in error_text
         ):
-
             return (
                 "AI chat quota is temporarily exceeded. "
                 "Weather questions are available separately."
@@ -956,7 +922,6 @@ def upload():
     return f"""
 <!DOCTYPE html>
 
-    result_html = f"""
 <html>
 
 <head>
