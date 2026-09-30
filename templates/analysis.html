@@ -19,14 +19,49 @@
             font-family: Arial, sans-serif;
         }
 
+        html { scroll-behavior: smooth; }
+
         body {
             min-height: 100vh;
-            background: linear-gradient(
-                135deg,
-                #0f172a,
-                #1e1b4b
-            );
             color: white;
+            overflow-x: hidden;
+            position: relative;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,20,147,.20), transparent 28%),
+                radial-gradient(circle at 85% 25%, rgba(255,42,163,.18), transparent 30%),
+                radial-gradient(circle at 50% 90%, rgba(180,0,120,.14), transparent 35%),
+                linear-gradient(135deg, #050307, #100008 50%, #030204);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -20%;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(255,42,163,.13), transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(255,0,128,.11), transparent 22%);
+            filter: blur(35px);
+            animation: bgMove 8s ease-in-out infinite alternate;
+            z-index: -2;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .20;
+            background-image:
+                linear-gradient(rgba(255,42,163,.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,42,163,.08) 1px, transparent 1px);
+            background-size: 45px 45px;
+            z-index: -1;
+        }
+
+        @keyframes bgMove {
+            from { transform: translate(-2%, -1%) scale(1); }
+            to { transform: translate(2%, 2%) scale(1.08); }
         }
 
         .navbar {
@@ -34,75 +69,145 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 8%;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(3,2,4,.84);
+            border-bottom: 1px solid rgba(255,42,163,.24);
+            backdrop-filter: blur(14px);
+            position: relative;
+            z-index: 5;
         }
 
         .logo {
             font-size: 22px;
             font-weight: bold;
-            color: #a78bfa;
+            color: #ff2aa3;
+            text-shadow: 0 0 18px rgba(255,42,163,.75);
         }
 
         .home {
             color: white;
             text-decoration: none;
+            transition: .25s ease;
         }
 
         .home:hover {
-            color: #a78bfa;
+            color: #ff2aa3;
+            text-shadow: 0 0 12px rgba(255,42,163,.8);
         }
 
         .container {
-            min-height: 85vh;
+            min-height: 88vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px 20px;
+            padding: 55px 20px;
         }
 
         .analysis-box {
             width: 100%;
             max-width: 600px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: linear-gradient(145deg, rgba(35,8,28,.92), rgba(12,4,12,.90));
+            border: 1px solid rgba(255,42,163,.45);
             border-radius: 25px;
             padding: 40px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow:
+                0 0 35px rgba(255,20,147,.14),
+                0 25px 80px rgba(0,0,0,.55),
+                inset 0 0 35px rgba(255,42,163,.04);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analysis-box::before,
+        .analysis-box::after {
+            content: "";
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            background: rgba(255,42,163,.12);
+            filter: blur(50px);
+            pointer-events: none;
+        }
+
+        .analysis-box::before {
+            top: -120px;
+            left: -90px;
+            animation: glowFloat 6s ease-in-out infinite alternate;
+        }
+
+        .analysis-box::after {
+            right: -100px;
+            bottom: -120px;
+            animation: glowFloat 7s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes glowFloat {
+            to { transform: translate(35px,25px) scale(1.25); }
         }
 
         h1 {
             font-size: 36px;
             margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 20px rgba(255,42,163,.25);
         }
 
         .subtitle {
-            color: #cbd5e1;
+            color: #b9aeb7;
             line-height: 1.6;
             margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
         }
 
         .upload-area {
-            border: 2px dashed #8b5cf6;
+            border: 1px dashed rgba(255,42,163,.75);
             border-radius: 20px;
             padding: 30px 20px;
             margin-bottom: 20px;
-            background: rgba(124, 58, 237, 0.08);
+            background: linear-gradient(145deg, rgba(255,42,163,.08), rgba(255,0,128,.025));
+            box-shadow: inset 0 0 25px rgba(255,42,163,.04);
+            transition: .35s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-area:hover {
+            transform: translateY(-3px);
+            border-color: #ff2aa3;
+            box-shadow: 0 0 25px rgba(255,42,163,.18), inset 0 0 25px rgba(255,42,163,.06);
         }
 
         .mic {
             font-size: 65px;
             margin-bottom: 15px;
+            display: inline-block;
+            filter: drop-shadow(0 0 14px rgba(255,42,163,.45));
+            animation: micPulse 2.2s ease-in-out infinite;
+        }
+
+        @keyframes micPulse {
+            0%,100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,42,163,.35)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 24px rgba(255,42,163,.75)); }
         }
 
         .upload-area h2 {
-            color: #c4b5fd;
+            color: #ff8acb;
             margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255,42,163,.25);
         }
 
         .upload-area p {
-            color: #94a3b8;
+            color: #9e8f99;
             margin-bottom: 20px;
+        }
+
+        .record-btn,
+        .choose-btn,
+        .analyze-btn {
+            transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
         }
 
         .record-btn {
@@ -110,59 +215,63 @@
             padding: 15px;
             border: none;
             border-radius: 12px;
-            background: #dc2626;
+            background: linear-gradient(135deg, #ff1493, #ff2aa3);
             color: white;
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 12px;
+            box-shadow: 0 0 18px rgba(255,20,147,.28);
         }
 
         .record-btn:hover {
-            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255,20,147,.55);
         }
 
         .record-btn.stop {
-            background: #475569;
+            background: linear-gradient(135deg, #ff1493, #c026d3);
+            animation: recordingGlow 1.2s ease-in-out infinite;
         }
 
-        .record-btn.stop:hover {
-            background: #334155;
+        @keyframes recordingGlow {
+            50% { box-shadow: 0 0 32px rgba(255,20,147,.75); }
         }
 
         .status {
             min-height: 25px;
             margin: 12px 0;
-            color: #c4b5fd;
+            color: #ff8acb;
             font-size: 14px;
         }
 
         audio {
             width: 100%;
-            margin: 10px 0 20px 0;
+            margin: 10px 0 20px;
+            accent-color: #ff2aa3;
         }
 
-        input[type="file"] {
-            display: none;
-        }
+        input[type="file"] { display: none; }
 
         .choose-btn {
             display: inline-block;
             padding: 13px 25px;
-            background: #7c3aed;
+            background: linear-gradient(135deg, #ff1493, #ff2aa3);
             color: white;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            box-shadow: 0 0 18px rgba(255,20,147,.22);
         }
 
         .choose-btn:hover {
-            background: #6d28d9;
+            transform: translateY(-2px);
+            box-shadow: 0 0 28px rgba(255,20,147,.48);
         }
 
         #file-name {
             margin-top: 15px;
-            color: #c4b5fd;
+            color: #ff8acb;
             min-height: 20px;
         }
 
@@ -171,20 +280,25 @@
             padding: 15px;
             border: none;
             border-radius: 12px;
-            background: #7c3aed;
+            background: linear-gradient(135deg, #ff1493, #ff2aa3);
             color: white;
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 0 20px rgba(255,20,147,.25);
         }
 
         .analyze-btn:hover {
-            background: #6d28d9;
+            transform: translateY(-2px);
+            box-shadow: 0 0 32px rgba(255,20,147,.55);
         }
 
         .analyze-btn:disabled {
-            background: #475569;
+            background: #3a2635;
+            color: #8f7888;
+            box-shadow: none;
             cursor: not-allowed;
+            transform: none;
         }
 
         .divider {
@@ -192,7 +306,9 @@
             align-items: center;
             gap: 10px;
             margin: 25px 0;
-            color: #64748b;
+            color: #8d7383;
+            position: relative;
+            z-index: 1;
         }
 
         .divider::before,
@@ -200,30 +316,24 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: rgba(255,255,255,0.15);
+            background: linear-gradient(90deg, transparent, rgba(255,42,163,.35), transparent);
         }
 
         .info {
             margin-top: 25px;
-            color: #94a3b8;
+            color: #9e8f99;
             font-size: 14px;
             line-height: 1.5;
+            position: relative;
+            z-index: 1;
         }
 
         @media (max-width: 600px) {
-
-            .analysis-box {
-                padding: 25px 18px;
-            }
-
-            h1 {
-                font-size: 28px;
-            }
-
-            .mic {
-                font-size: 55px;
-            }
-
+            .navbar { padding: 18px 6%; }
+            .analysis-box { padding: 25px 18px; border-radius: 20px; }
+            h1 { font-size: 28px; }
+            .mic { font-size: 55px; }
+            .container { padding: 35px 14px; }
         }
 
     </style>
