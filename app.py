@@ -370,17 +370,18 @@ Emotion prediction is not a medical diagnosis.
     )
 
     try:
+
         previous_id = session.get(
             "previous_interaction_id"
         )
 
-interaction_args = {
-    "model": "gemini-3.8-flash",
-    "input": prompt,
-    "generation_config": {
-        "thinking_level": "low"
-    }
-}
+        interaction_args = {
+            "model": "gemini-3.8-flash",
+            "input": prompt,
+            "generation_config": {
+                "thinking_level": "low"
+            }
+        }
         if previous_id:
             interaction_args[
                 "previous_interaction_id"
